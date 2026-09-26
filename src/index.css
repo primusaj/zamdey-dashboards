@@ -1,0 +1,37 @@
+/* 1. Imports FIRST */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+/* 2. Theme Configuration SECOND */
+@theme {
+  --font-sans: "Poppins", sans-serif;
+  --color-zamdey-blue: #4338CA;
+}
+
+/* 3. Global Styles THIRD */
+body {
+  font-family: var(--font-sans);
+  background-color: #F1F5F9;
+  @apply antialiased text-slate-950;
+}
+
+/* Ensure no slanting across the UI */
+* {
+  font-style: normal !important;
+}
+
+h1 {
+  @apply text-2xl font-extrabold tracking-tighter uppercase;
+}
+
+h2 {
+  @apply text-xl font-bold tracking-tight;
+}
+
+h3 {
+  @apply text-lg font-semibold tracking-tight;
+}
+
+th {
+  @apply text-[10px] font-bold uppercase tracking-widest text-slate-500;
+}

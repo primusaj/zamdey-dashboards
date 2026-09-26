@@ -1,0 +1,111 @@
+import React, { useState } from 'react';
+import { LogOut, AlertCircle } from 'lucide-react'; 
+
+const NavItem = ({ icon, label, active, onClick }) => (
+  <div 
+    onClick={onClick} 
+    className={`flex items-center gap-4 px-6 py-3 cursor-pointer rounded-xl transition-all leading-none ${
+      active 
+      ? 'bg-indigo-700 text-white shadow-lg font-bold' 
+      : 'text-slate-600 hover:bg-slate-100 font-medium'
+    }`}
+  >
+    <span className="text-lg leading-none">{icon}</span>
+    <span className="text-sm tracking-tight">{label}</span>
+  </div>
+);
+
+const SectionLabel = ({ label }) => (
+  <p className="px-6 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-6 mb-1">
+    {label}
+  </p>
+);
+
+export default function Sidebar({ activeView, setActiveView }) {
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
+  const confirmLogout = () => {
+    localStorage.removeItem('zamdey_user');
+    localStorage.removeItem('zamdey_last_view');
+    localStorage.removeItem('token');
+    window.location.reload();
+  };
+
+  return (
+    <>
+      <aside className="w-64 bg-white border-r border-slate-300 flex flex-col fixed h-full z-50 overflow-hidden font-sans">
+        <div className="p-8 pb-4">
+          <h1 className="text-2xl font-extrabold tracking-tighter text-slate-900 uppercase">
+            zamdey
+          </h1>
+        </div>
+        
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto pb-4 custom-scrollbar">
+          <SectionLabel label="Global Overview" />
+          <NavItem label="Analytics" icon="📈" active={activeView === 'Dashboard'} onClick={() => setActiveView('Dashboard')} />
+          
+          <NavItem label="Approvals" icon="🛡️" active={activeView === 'Approvals'} onClick={() => setActiveView('Approvals')} />
+          
+          <SectionLabel label="Operations" />
+          <NavItem label="Rider Broadcast System" icon="🛰️" active={activeView === 'Operations'} onClick={() => setActiveView('Operations')} />
+          <NavItem label="Re-Assignment" icon="🔄" active={activeView === 'Reassignment'} onClick={() => setActiveView('Reassignment')} />
+          <NavItem label="Expansion Zones" icon="🌍" active={activeView === 'Zones'} onClick={() => setActiveView('Zones')} />
+          
+          <SectionLabel label="Financial Engine" />
+          <NavItem label="Pay Vendors" icon="💰" active={activeView === 'Finances'} onClick={() => setActiveView('Finances')} />
+          <NavItem label="Pay Riders" icon="💸" active={activeView === 'Payroll'} onClick={() => setActiveView('Payroll')} />
+          
+          <SectionLabel label="Marketplace" />
+          <NavItem label="Restaurants" icon="🏪" active={activeView === 'Restaurants'} onClick={() => setActiveView('Restaurants')} />
+          <NavItem label="Riders" icon="🏍️" active={activeView === 'Riders'} onClick={() => setActiveView('Riders')} />
+          <NavItem label="Customers" icon="👥" active={activeView === 'Customers'} onClick={() => setActiveView('Customers')} />
+
+          {/* 🚀 NEW: CONTENT MANAGEMENT SECTION */}
+          <SectionLabel label="Marketing & App" />
+          <NavItem label="Promotions & CMS" icon="🖼️" active={activeView === 'Content'} onClick={() => setActiveView('Content')} />
+
+          <SectionLabel label="Intel & Support" />
+          <NavItem label="Complaints" icon="⚖️" active={activeView === 'Complaints'} onClick={() => setActiveView('Complaints')} />
+          
+          {/* 🚨 NEW: SYSTEM CONFIGURATION SECTION ADDED HERE */}
+          <SectionLabel label="System Configuration" />
+          <NavItem label="Platform Settings" icon="⚙️" active={activeView === 'Settings'} onClick={() => setActiveView('Settings')} />
+        </nav>
+
+        <div className="p-4 border-t border-slate-200 bg-slate-50">
+            <button
+              onClick={() => setIsLogoutModalOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-rose-500 hover:bg-rose-100 transition-all duration-300 group"
+            >
+              <LogOut size={18} className="group-hover:scale-110 transition-transform"/>
+              <span className="text-xs font-black uppercase tracking-widest">Sign Out</span>
+            </button>
+        </div>
+      </aside>
+
+      {/* LOGOUT MODAL */}
+      {isLogoutModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsLogoutModalOpen(false)} />
+          <div className="bg-white rounded-[32px] p-8 w-full max-w-sm relative z-10 shadow-2xl animate-in zoom-in-95 duration-200 border-2 border-slate-100">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mb-2">
+                <AlertCircle className="text-rose-500" size={32} strokeWidth={2.5} />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase italic">Signing Out?</h3>
+                <p className="text-xs font-bold text-slate-400 mt-2 px-4">
+                  You are about to end your session. Any unsaved changes might be lost.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 w-full pt-4">
+                <button onClick={() => setIsLogoutModalOpen(false)} className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-slate-50 text-slate-400 hover:bg-slate-100 transition-colors">Cancel</button>
+                <button onClick={confirmLogout} className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-rose-500 text-white shadow-lg shadow-rose-200 hover:bg-rose-600 transition-all hover:scale-[1.02]">Confirm</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
