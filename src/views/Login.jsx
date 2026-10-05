@@ -4,8 +4,7 @@ import {
   ShieldAlert, MapPin, Phone, FileText, Briefcase, 
   Wallet, Smartphone, Building, UploadCloud, CheckCircle2
 } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
+import { API_URL, DEFAULT_ZONES, fetchSafeZones } from '../config';
 
 export default function Login({ onLogin }) {
   const [isRegister, setIsRegister] = useState(false);
@@ -14,7 +13,7 @@ export default function Login({ onLogin }) {
   const [error, setError] = useState('');
   
   const [role, setRole] = useState('RESTAURANT'); 
-  const [zones, setZones] = useState([]);
+  const [zones, setZones] = useState(DEFAULT_ZONES);
   
   const [formData, setFormData] = useState({
     email: '', password: '', fullName: '', phone: '',
@@ -25,13 +24,19 @@ export default function Login({ onLogin }) {
   });
 
   useEffect(() => {
-    const fetchZones = async () => {
+    let isMounted = true;
+    const loadZones = async () => {
       try {
-        const res = await fetch(`${API_URL}/zones`);
-        if (res.ok) setZones(await res.json());
-      } catch (err) { console.error("Zone fetch failed", err); }
+        const safeZones = await fetchSafeZones();
+        if (isMounted && safeZones && safeZones.length > 0) {
+          setZones(safeZones);
+        }
+      } catch {
+        if (isMounted) setZones(DEFAULT_ZONES);
+      }
     };
-    fetchZones();
+    loadZones();
+    return () => { isMounted = false; };
   }, []);
 
   const resetForm = (targetRole) => {
@@ -218,14 +223,14 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen flex bg-white font-sans overflow-hidden">
+    <div className="min-h-screen flex bg-white font-sans overflow-y-auto">
       
       {/* 👈 LEFT SIDE: FORM */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-12 relative z-10 overflow-y-auto">
-        <div className="w-full max-w-md space-y-6 animate-in slide-in-from-left duration-700">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 lg:p-12 relative z-10 my-auto">
+        <div className="w-full max-w-md space-y-6 animate-in slide-in-from-left duration-700 py-6">
           
           <div className="mb-6">
-            <h1 className="text-4xl font-black text-slate-900 italic tracking-tighter uppercase mb-2">
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 italic tracking-tighter uppercase mb-2">
               {isRegister ? 'Partner Sign Up' : 'Portal Login'}
             </h1>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center justify-between">

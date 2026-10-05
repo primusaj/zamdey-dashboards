@@ -5,7 +5,7 @@ import {
   Flame, Sparkles, Loader2, Star, Tag
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 export default function Inventory() { 
   const [menu, setMenu] = useState([]);
@@ -219,38 +219,38 @@ export default function Inventory() {
   }, [activeItem]);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] bg-[#FDFCFB] rounded-[40px] border-2 border-slate-900 overflow-hidden font-sans shadow-xl">
+    <div className="flex flex-col min-h-[calc(100vh-140px)] sm:h-[calc(100vh-140px)] bg-[#FDFCFB] rounded-2xl sm:rounded-[40px] border-2 border-slate-900 overflow-hidden font-sans shadow-xl">
       
       {/* 🚀 HEADER */}
-      <div className="p-8 border-b-2 border-slate-900 flex items-center justify-between bg-white relative">
+      <div className="p-4 sm:p-8 border-b-2 border-slate-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white relative">
         <div className="relative z-10">
-          <h1 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase italic tracking-tighter flex items-center gap-3">
             <Flame className="text-orange-500 animate-pulse" fill="currentColor" /> Meal Listing
           </h1>
-          <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1 ml-1">Live Database Connection Active</p>
+          <p className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-1 ml-1">Live Database Connection Active</p>
         </div>
         
         <button 
           onClick={() => { setActiveItem(null); setIsPanelOpen(true); }}
-          className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-900 transition-all duration-300 shadow-lg shadow-indigo-200 flex items-center gap-2"
+          className="w-full sm:w-auto bg-indigo-600 text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-900 transition-all duration-300 shadow-lg shadow-indigo-200 flex items-center justify-center gap-2 min-h-[44px]"
         >
           <Plus size={18} strokeWidth={3} /> Add New Meal
         </button>
       </div>
 
       {/* 📋 LIST VIEW */}
-      <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50/50">
         {loading ? (
           <div className="flex flex-col items-center justify-center h-full space-y-4">
               <Loader2 className="animate-spin text-slate-900" size={48} />
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Syncing Inventory...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {menu.map((item) => (
               <div 
                 key={item.id} 
-                className="group bg-white border border-slate-900 rounded-[32px] overflow-hidden hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 shadow-sm relative"
+                className="group bg-white border border-slate-900 rounded-2xl sm:rounded-[32px] overflow-hidden hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 shadow-sm relative"
               >
                 {/* Popular Badge */}
                 {item.is_popular && (
@@ -260,7 +260,7 @@ export default function Inventory() {
                   </div>
                 )}
 
-                <div className="h-48 relative overflow-hidden">
+                <div className="h-44 sm:h-48 relative overflow-hidden">
                   {/* 🚀 FIXED: Using getFullImageUrl to build the correct path */}
                   <img src={getFullImageUrl(item.image_url)} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
                   
@@ -274,10 +274,10 @@ export default function Inventory() {
                   </button>
                 </div>
                 
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-black text-slate-900 uppercase italic truncate w-40">{item.name}</h3>
-                    <div className="text-right">
+                <div className="p-4 sm:p-6">
+                  <div className="flex justify-between items-start mb-2 gap-2">
+                    <h3 className="text-base sm:text-lg font-black text-slate-900 uppercase italic truncate flex-1">{item.name}</h3>
+                    <div className="text-right shrink-0">
                         {item.promo_price ? (
                            <>
                              <span className="text-slate-400 font-bold text-xs line-through block">{Number(item.price).toLocaleString()} XAF</span>
@@ -288,16 +288,16 @@ export default function Inventory() {
                         )}
                     </div>
                   </div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{item.category}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 truncate">{item.category}</p>
                   
-                  <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+                  <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-slate-100">
                     <button 
                         onClick={() => { setActiveItem(item); setPreviewImage(item.image_url); setIsPanelOpen(true); }}
-                        className="text-[9px] font-black text-slate-300 uppercase hover:text-indigo-600 flex items-center gap-1"
+                        className="text-[9px] font-black text-slate-400 uppercase hover:text-indigo-600 flex items-center gap-1 min-h-[36px]"
                     >
                         View Details <ChevronRight size={14}/>
                     </button>
-                    <button onClick={() => handleDelete(item.id, item.name)} className="text-slate-300 hover:text-rose-600 transition-colors">
+                    <button onClick={() => handleDelete(item.id, item.name)} className="text-slate-400 hover:text-rose-600 transition-colors p-2 rounded-lg">
                         <Trash2 size={18} />
                     </button>
                   </div>
@@ -318,17 +318,17 @@ export default function Inventory() {
       {isPanelOpen && (
         <>
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[99] animate-in fade-in" onClick={closePanel} />
-          <div className="fixed top-4 right-4 bottom-4 w-[500px] bg-white z-[100] rounded-[40px] border-2 border-slate-900 flex flex-col animate-in slide-in-from-right duration-500 shadow-2xl">
+          <div className="fixed inset-x-0 bottom-0 top-12 sm:inset-y-4 sm:left-auto sm:right-4 w-full sm:w-[500px] max-w-full bg-white z-[100] rounded-t-3xl sm:rounded-[40px] border-t-2 sm:border-2 border-slate-900 flex flex-col animate-in slide-in-from-bottom sm:slide-in-from-right duration-300 sm:duration-500 shadow-2xl">
             <form onSubmit={handleSave} className="h-full flex flex-col">
               
-              <div className="p-8 border-b border-slate-100 flex justify-between items-center">
-                <h2 className="text-2xl font-black text-slate-900 uppercase italic flex items-center gap-2">
+              <div className="p-4 sm:p-8 border-b border-slate-100 flex justify-between items-center shrink-0">
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 uppercase italic flex items-center gap-2">
                   <Sparkles className="text-indigo-600" size={24} /> Meal Master
                 </h2>
                 <button type="button" onClick={closePanel} className="p-2 hover:bg-slate-50 rounded-full transition-colors"><X size={24}/></button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-10 space-y-6 sm:space-y-8 custom-scrollbar">
                 
                 {/* IMAGE UPLOAD ZONE */}
                 <div className="space-y-3">

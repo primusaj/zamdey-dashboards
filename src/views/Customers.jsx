@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, History, ShieldCheck, X, ShoppingBag, User, Loader2, Phone } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 export default function Customers() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,7 +20,7 @@ export default function Customers() {
         const data = await res.json();
         if (Array.isArray(data)) setCustomers(data);
       } catch (error) {
-        console.error("Customer fetch failed:", error);
+        console.warn("Customer fetch warning:", error);
       } finally {
         setLoading(false);
       }
@@ -40,13 +40,13 @@ export default function Customers() {
     <div className="space-y-6 animate-in fade-in duration-500 font-sans pb-24">
       
       {/* 🔝 HEADER & SEARCH */}
-      <div className="flex justify-between items-end border-b-2 border-slate-900 pb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end border-b-2 border-slate-900 pb-6 gap-4">
         <div>
-          <h2 className="text-slate-900 font-black text-2xl uppercase tracking-tighter">Customer Intelligence</h2>
+          <h2 className="text-slate-900 font-black text-xl sm:text-2xl uppercase tracking-tighter">Customer Intelligence</h2>
           <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Managing {customers.length} Registered Users</p>
         </div>
         
-        <div className="relative w-72">
+        <div className="relative w-full sm:w-72">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
           <input 
             type="text" 
@@ -59,33 +59,33 @@ export default function Customers() {
       </div>
 
       {/* 📋 CUSTOMER LEDGER */}
-      <div className="bg-white border border-slate-200 shadow-sm overflow-hidden rounded-xl">
-        <table className="w-full text-left">
+      <div className="bg-white border border-slate-200 shadow-sm overflow-x-auto rounded-xl w-full">
+        <table className="w-full text-left min-w-[600px]">
           <thead className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200">
             <tr>
-              <th className="px-6 py-4">Customer Profile</th>
-              <th className="px-6 py-4">LTV (Total Spent)</th>
-              <th className="px-6 py-4">Account Status</th>
-              <th className="px-6 py-4 text-right">Verification</th>
+              <th className="px-4 sm:px-6 py-4 whitespace-nowrap">Customer Profile</th>
+              <th className="px-4 sm:px-6 py-4 whitespace-nowrap">LTV (Total Spent)</th>
+              <th className="px-4 sm:px-6 py-4 whitespace-nowrap">Account Status</th>
+              <th className="px-4 sm:px-6 py-4 text-right whitespace-nowrap">Verification</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filteredCustomers.map(customer => (
               <tr key={customer.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-6 py-5">
+                <td className="px-4 sm:px-6 py-4 sm:py-5">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-slate-100 rounded flex items-center justify-center text-slate-500">
+                    <div className="w-9 h-9 bg-slate-100 rounded flex items-center justify-center text-slate-500 shrink-0">
                       <User size={18} />
                     </div>
-                    <div>
-                      <p className="font-black text-slate-900 uppercase text-sm">{customer.name}</p>
-                      <p className="text-[10px] font-bold text-slate-400 font-mono tracking-tighter flex items-center gap-1 mt-0.5">
-                        <Phone size={10}/> {customer.phone}
+                    <div className="min-w-0">
+                      <p className="font-black text-slate-900 uppercase text-sm truncate">{customer.name}</p>
+                      <p className="text-[10px] font-bold text-slate-400 font-mono tracking-tighter flex items-center gap-1 mt-0.5 truncate">
+                        <Phone size={10} className="shrink-0"/> {customer.phone}
                       </p>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-5">
+                <td className="px-4 sm:px-6 py-4 sm:py-5 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     <span className="font-black text-slate-900">{customer.ltv.toLocaleString()} XAF</span>
                     <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-1.5 rounded uppercase">
@@ -93,14 +93,14 @@ export default function Customers() {
                     </span>
                   </div>
                 </td>
-                <td className="px-6 py-5">
+                <td className="px-4 sm:px-6 py-4 sm:py-5 whitespace-nowrap">
                   <span className={`px-3 py-1 rounded text-[9px] font-black uppercase tracking-widest border ${
                     customer.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'
                   }`}>
                     {customer.status}
                   </span>
                 </td>
-                <td className="px-6 py-5 text-right space-x-1">
+                <td className="px-4 sm:px-6 py-4 sm:py-5 text-right space-x-1 whitespace-nowrap">
                   <button 
                     onClick={() => setSelectedCustomer(customer)}
                     className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-md transition-all border border-transparent hover:border-slate-200"

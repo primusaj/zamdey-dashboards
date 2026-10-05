@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Plus, X, Globe, TrendingUp, ShieldCheck, Trash2, Loader2, DollarSign } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+import { API_URL, DEFAULT_ZONES, fetchSafeZones } from '../config';
 
 export default function Zones({ locations = [], setLocations }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,21 +12,22 @@ export default function Zones({ locations = [], setLocations }) {
   // 🔄 1. FETCH ZONES
   const fetchZones = async () => {
     try {
-      const res = await fetch(`${API_URL}/zones`);
-      if (res.ok) {
-        const data = await res.json();
-        
-        // Map backend data to UI format
+      const data = await fetchSafeZones();
+      if (Array.isArray(data) && data.length > 0) {
         const formatted = data.map(z => ({
           ...z,
           // Use real DB status if available, else default to 'Active'
           status: z.is_active === false ? 'Inactive' : 'Active', 
-          risk: 'Low' // We still simulate risk for UI flair (can be added to DB later)
+          risk: z.risk || 'Low'
         }));
         setLocations(formatted);
+      } else if (!locations || locations.length === 0) {
+        setLocations(DEFAULT_ZONES);
       }
-    } catch (error) {
-      console.error("Failed to sync zones");
+    } catch {
+      if (!locations || locations.length === 0) {
+        setLocations(DEFAULT_ZONES);
+      }
     }
   };
 
@@ -93,27 +93,27 @@ export default function Zones({ locations = [], setLocations }) {
     <div className="space-y-6 animate-in fade-in duration-500 font-sans pb-24">
       
       {/* 🔝 HEADER */}
-      <div className="flex justify-between items-center border-b-2 border-slate-900 pb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b-2 border-slate-900 pb-6 gap-4">
         <div>
-          <h2 className="text-slate-900 font-black text-2xl uppercase tracking-tighter">Expansion Board</h2>
+          <h2 className="text-slate-900 font-black text-xl sm:text-2xl uppercase tracking-tighter">Expansion Board</h2>
           <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Territorial Parameter Management</p>
         </div>
         
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-slate-900 text-white px-6 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-md flex items-center gap-2"
+          className="w-full sm:w-auto bg-slate-900 text-white px-6 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-md flex items-center justify-center gap-2 min-h-[44px]"
         >
           <Plus size={16} /> New Zone
         </button>
       </div>
 
       {/* 🗺️ ZONE GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {locations.map((zone) => (
           <div key={zone.id} className="bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-400 transition-all flex flex-col group">
             
             {/* Header */}
-            <div className="p-5 border-b border-slate-50 flex justify-between items-start">
+            <div className="p-4 sm:p-5 border-b border-slate-50 flex justify-between items-start">
               <div className="p-2.5 bg-slate-50 text-indigo-600 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                 <MapPin size={18} />
               </div>
@@ -127,15 +127,15 @@ export default function Zones({ locations = [], setLocations }) {
             </div>
 
             {/* Content */}
-            <div className="p-5 flex-1">
-              <h3 className="text-base font-black text-slate-900 uppercase tracking-tight mb-4">{zone.name}</h3>
+            <div className="p-4 sm:p-5 flex-1">
+              <h3 className="text-base font-black text-slate-900 uppercase tracking-tight mb-4 truncate">{zone.name}</h3>
               
               <div className="grid grid-cols-2 gap-2">
                 {/* 💰 Price Badge */}
                 <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
                   <p className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Base Fee</p>
-                  <p className="text-[10px] font-black text-slate-700 flex items-center gap-1">
-                    <DollarSign size={10} className="text-emerald-500" />
+                  <p className="text-[10px] font-black text-slate-700 flex items-center gap-1 truncate">
+                    <DollarSign size={10} className="text-emerald-500 shrink-0" />
                     {zone.base_price?.toLocaleString()} XAF
                   </p>
                 </div>
@@ -152,10 +152,10 @@ export default function Zones({ locations = [], setLocations }) {
             </div>
 
             {/* Actions */}
-            <div className="px-5 py-3 bg-slate-50/50 border-t border-slate-50 flex justify-end">
+            <div className="px-4 sm:px-5 py-3 bg-slate-50/50 border-t border-slate-50 flex justify-end">
               <button 
                 onClick={() => deleteZone(zone.id)}
-                className="text-slate-300 hover:text-rose-600 transition-colors p-1"
+                className="text-slate-400 hover:text-rose-600 transition-colors p-2 rounded-lg hover:bg-white"
                 title="Decommission Zone"
               >
                 <Trash2 size={16} />
@@ -167,7 +167,7 @@ export default function Zones({ locations = [], setLocations }) {
         {/* ➕ GHOST CARD */}
         <div 
           onClick={() => setIsModalOpen(true)}
-          className="border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-8 text-slate-300 hover:border-indigo-300 hover:text-indigo-400 cursor-pointer transition-all bg-slate-50/20"
+          className="border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-6 sm:p-8 text-slate-300 hover:border-indigo-300 hover:text-indigo-400 cursor-pointer transition-all bg-slate-50/20 min-h-[140px]"
         >
           <Globe size={32} strokeWidth={1.5} />
           <p className="mt-2 font-black text-[9px] uppercase tracking-widest text-center">Establish New<br/>Territory</p>
@@ -176,11 +176,11 @@ export default function Zones({ locations = [], setLocations }) {
 
       {/* 📋 MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] p-4">
-          <div className="bg-white w-full max-w-sm border border-slate-200 shadow-2xl p-10 animate-in zoom-in-95 relative">
-            <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 text-slate-400 hover:text-slate-900"><X size={20} /></button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] p-3 sm:p-4">
+          <div className="bg-white w-full max-w-sm border border-slate-200 shadow-2xl p-6 sm:p-10 animate-in zoom-in-95 relative rounded-2xl sm:rounded-3xl max-h-[90vh] overflow-y-auto">
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-4 sm:top-6 right-4 sm:right-6 text-slate-400 hover:text-slate-900 p-2"><X size={20} /></button>
             
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8 pr-6">
               <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">New Zone</h3>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Platform expansion setting</p>
             </div>

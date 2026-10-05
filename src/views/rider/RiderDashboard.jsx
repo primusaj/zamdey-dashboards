@@ -6,7 +6,7 @@ import {
 
 import { io } from 'socket.io-client';
 
-const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://zamdey-backend.onrender.com/api:5000';
+const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://zamdey-backend.onrender.com';
 const API_URL = import.meta.env.VITE_API_URL || `${BASE_URL}/api`;
 
 const socket = io(BASE_URL, {
@@ -281,20 +281,20 @@ export default function RiderDashboard() {
   if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-slate-900" /></div>;
 
   return (
-    <div className="max-w-[480px] mx-auto space-y-6 pb-24 px-4 font-sans pt-6 bg-slate-50 min-h-screen">
+    <div className="max-w-[480px] mx-auto space-y-5 sm:space-y-6 pb-24 px-1 sm:px-4 font-sans">
       
       {/* HEADER */}
       <div className="flex items-center justify-between px-2">
         <div>
-           <h1 className="text-2xl font-black text-slate-900 italic tracking-tighter uppercase">Rider Portal</h1>
+           <h1 className="text-xl sm:text-2xl font-black text-slate-900 italic tracking-tighter uppercase">Rider Portal</h1>
            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{riderProfile?.user?.full_name || "Active Partner"}</p>
         </div>
-        <button onClick={() => setIsLogoutModalOpen(true)} className="w-10 h-10 bg-white text-rose-500 rounded-xl flex items-center justify-center shadow-sm border border-slate-100"><LogOut size={18} /></button>
+        <button onClick={() => setIsLogoutModalOpen(true)} className="w-10 h-10 bg-white text-rose-500 rounded-xl flex items-center justify-center shadow-sm border border-slate-100 min-h-[40px] min-w-[40px]"><LogOut size={18} /></button>
       </div>
 
       {/* STATUS & WALLET ROW */}
-      <div className="grid grid-cols-2 gap-4">
-          <div className={`p-4 rounded-[24px] border-2 flex flex-col justify-between h-32 transition-colors duration-300 ${isOnline ? 'bg-emerald-500 border-emerald-600 text-white' : 'bg-white border-slate-200 text-slate-400'}`}>
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div className={`p-3.5 sm:p-4 rounded-2xl sm:rounded-[24px] border-2 flex flex-col justify-between h-32 transition-colors duration-300 ${isOnline ? 'bg-emerald-500 border-emerald-600 text-white' : 'bg-white border-slate-200 text-slate-400'}`}>
             <div className="flex justify-between items-start">
                  <Power size={20} className={isOnline ? "text-emerald-200" : "text-slate-300"} />
                  <button 
@@ -310,16 +310,16 @@ export default function RiderDashboard() {
                  </button>
             </div>
             <div>
-                 <h3 className="text-lg font-black italic uppercase">{isOnline ? 'Online' : 'Offline'}</h3>
+                 <h3 className="text-base sm:text-lg font-black italic uppercase">{isOnline ? 'Online' : 'Offline'}</h3>
                  <p className="text-[9px] opacity-80">{isOnline ? "Listening to Zone Broadcasts" : "Status Hidden"}</p>
             </div>
           </div>
 
-          <div className="bg-slate-900 p-4 rounded-[24px] text-white shadow-xl h-32 flex flex-col justify-between relative overflow-hidden">
+          <div className="bg-slate-900 p-3.5 sm:p-4 rounded-2xl sm:rounded-[24px] text-white shadow-xl h-32 flex flex-col justify-between relative overflow-hidden">
              <div className="absolute top-0 right-0 p-4 opacity-10"><Wallet size={64} /></div>
              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Balance</p>
-             <h3 className="text-2xl font-black italic tracking-tighter">
-                {riderProfile?.wallet_balance?.toLocaleString() || 0} <span className="text-sm font-normal text-slate-500">FRS</span>
+             <h3 className="text-xl sm:text-2xl font-black italic tracking-tighter truncate">
+                {riderProfile?.wallet_balance?.toLocaleString() || 0} <span className="text-xs sm:text-sm font-normal text-slate-500">FRS</span>
              </h3>
           </div>
       </div>

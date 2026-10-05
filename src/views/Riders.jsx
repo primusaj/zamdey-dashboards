@@ -5,7 +5,7 @@ import {
   MapPin, Shield, ChevronRight, Filter, AlertOctagon
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 const StatWidget = ({ label, value, sub, color }) => (
   <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col min-w-[160px]">
@@ -158,17 +158,17 @@ export default function Riders() {
 
   return (
     <div className="max-w-7xl mx-auto pb-20 font-sans space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col xl:flex-row justify-between items-end border-b-2 border-slate-900 pb-6 gap-6">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end border-b-2 border-slate-900 pb-6 gap-6">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight italic uppercase">Fleet Command</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight italic uppercase">Fleet Command</h1>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">Managing {riders.length} Personnel</p>
         </div>
         
-        <div className="flex gap-4">
+        <div className="flex flex-wrap sm:flex-nowrap gap-3 sm:gap-4 w-full xl:w-auto items-stretch sm:items-end">
             <StatWidget label="Active Riders" value={activeCount} color="text-indigo-600" />
             <StatWidget label="Pending Payouts" value={`${totalFleetBalance.toLocaleString()}`} sub="XAF" color="text-emerald-500" />
-            <div className="flex flex-col justify-end gap-2">
-                <button onClick={handleBatchPayout} disabled={totalFleetBalance <= 0} className={`px-5 py-3 rounded-xl font-bold text-white flex items-center gap-2 shadow-lg transition-all active:scale-95 text-xs uppercase tracking-wider ${totalFleetBalance > 0 ? 'bg-slate-900 hover:bg-indigo-600' : 'bg-slate-200 cursor-not-allowed text-slate-400'}`}>
+            <div className="flex flex-col justify-end gap-2 w-full sm:w-auto">
+                <button onClick={handleBatchPayout} disabled={totalFleetBalance <= 0} className={`px-5 py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 text-xs uppercase tracking-wider min-h-[44px] ${totalFleetBalance > 0 ? 'bg-slate-900 hover:bg-indigo-600' : 'bg-slate-200 cursor-not-allowed text-slate-400'}`}>
                    <Banknote size={16} /> Pay Fleet
                 </button>
                 <button onClick={exportToCSV} className="text-[10px] font-bold text-slate-400 hover:text-slate-600 flex items-center justify-end gap-1 uppercase tracking-wider">
@@ -181,11 +181,11 @@ export default function Riders() {
       <div className="flex flex-col md:flex-row gap-4 justify-between">
          <div className="relative group w-full md:w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-600 transition-colors" size={18} />
-            <input type="text" placeholder="Find rider..." className="pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl w-full outline-none focus:border-indigo-500 font-bold text-slate-700 text-sm transition-all shadow-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <input type="text" placeholder="Find rider..." className="pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl w-full outline-none focus:border-indigo-500 font-bold text-slate-700 text-sm transition-all shadow-sm min-h-[44px]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
          </div>
-         <div className="flex bg-white p-1 rounded-xl border border-slate-100 shadow-sm">
+         <div className="flex bg-white p-1 rounded-xl border border-slate-100 shadow-sm overflow-x-auto max-w-full">
             {['ALL', 'ACTIVE', 'PENDING', 'SUSPENDED'].map(status => (
-                <button key={status} onClick={() => setFilterStatus(status)} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${filterStatus === status ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50'}`}>
+                <button key={status} onClick={() => setFilterStatus(status)} className={`px-3.5 sm:px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap min-h-[40px] ${filterStatus === status ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50'}`}>
                    {status}
                 </button>
             ))}
@@ -194,15 +194,15 @@ export default function Riders() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredRiders.map((rider) => (
-          <div key={rider.id} className="bg-white border border-slate-100 rounded-[24px] p-6 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
+          <div key={rider.id} className="bg-white border border-slate-100 rounded-2xl sm:rounded-[24px] p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
              
              <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-4">
-                   <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-inner ${rider.account_status === 'ACTIVE' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'}`}>
+                   <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-inner ${rider.account_status === 'ACTIVE' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'}`}>
                       {rider.name.charAt(0)}
                    </div>
                    <div>
-                      <h3 className="font-black text-lg text-slate-900 leading-tight flex items-center gap-2">
+                      <h3 className="font-black text-base sm:text-lg text-slate-900 leading-tight flex items-center gap-2">
                           {rider.name} 
                           {rider.is_busy && <span className="flex h-3 w-3"><span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-rose-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span></span>}
                       </h3>
@@ -217,12 +217,12 @@ export default function Riders() {
              <div className="grid grid-cols-2 gap-3 mb-6">
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                    <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Wallet</p>
-                   <p className={`text-lg font-black ${rider.wallet_balance > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>{rider.wallet_balance?.toLocaleString()}</p>
+                   <p className={`text-base sm:text-lg font-black ${rider.wallet_balance > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>{rider.wallet_balance?.toLocaleString()}</p>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 relative group/edit">
                    <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Commission</p>
-                   <p className="text-lg font-black text-slate-700">{rider.commission_rate}%</p>
-                   <button onClick={() => openModal(rider, 'EDIT')} className="absolute top-2 right-2 p-1.5 bg-white rounded-lg text-slate-300 hover:text-indigo-600 hover:shadow-sm opacity-0 group-hover/edit:opacity-100 transition-all"><Pencil size={12} /></button>
+                   <p className="text-base sm:text-lg font-black text-slate-700">{rider.commission_rate}%</p>
+                   <button onClick={() => openModal(rider, 'EDIT')} aria-label="Edit commission" className="absolute top-2 right-2 p-1.5 bg-white rounded-lg text-slate-400 hover:text-indigo-600 hover:shadow-sm sm:opacity-0 sm:group-hover/edit:opacity-100 transition-all min-h-[32px] min-w-[32px] flex items-center justify-center"><Pencil size={12} /></button>
                 </div>
              </div>
 
@@ -269,26 +269,26 @@ export default function Riders() {
       )}
 
       {isModalOpen && selectedRider && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in zoom-in-95 duration-200">
-          <div className="bg-white rounded-[32px] p-8 w-full max-w-md shadow-2xl relative overflow-hidden">
-            <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4"><Bike size={32} /></div>
-                <h3 className="text-2xl font-black text-slate-900 uppercase italic">{modalType === 'APPROVE' ? `Activate Rider` : `Update Contract`}</h3>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-3 sm:p-4 animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-2xl sm:rounded-[32px] p-5 sm:p-8 w-full max-w-md shadow-2xl relative overflow-hidden max-h-[90vh] overflow-y-auto">
+            <div className="text-center mb-6 sm:mb-8">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4"><Bike size={28} /></div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 uppercase italic">{modalType === 'APPROVE' ? `Activate Rider` : `Update Contract`}</h3>
                 <p className="text-slate-500 font-bold text-xs mt-1">{selectedRider.name}</p>
             </div>
             
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
               <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Commission Rate (%)</label>
               <div className="relative">
-                  <input type="number" value={commissionRate} onChange={(e) => setCommissionRate(e.target.value)} className="w-full pl-6 pr-12 py-4 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 outline-none font-black text-3xl text-slate-900 text-center" />
-                  <span className="absolute right-6 top-1/2 -translate-y-1/2 font-black text-slate-300 text-xl">%</span>
+                  <input type="number" value={commissionRate} onChange={(e) => setCommissionRate(e.target.value)} className="w-full pl-6 pr-12 py-3.5 sm:py-4 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 outline-none font-black text-2xl sm:text-3xl text-slate-900 text-center" />
+                  <span className="absolute right-6 top-1/2 -translate-y-1/2 font-black text-slate-300 text-lg sm:text-xl">%</span>
               </div>
               <p className="text-[10px] text-center text-slate-400 font-bold mt-3">Standard rate is 20%. This affects all future earnings.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => setIsModalOpen(false)} className="py-4 bg-slate-50 text-slate-400 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-100 transition-colors">Cancel</button>
-              <button onClick={handleSaveContract} className="py-4 bg-indigo-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all hover:scale-[1.02]">Confirm</button>
+              <button onClick={() => setIsModalOpen(false)} className="py-3.5 sm:py-4 bg-slate-50 text-slate-400 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-100 transition-colors min-h-[44px]">Cancel</button>
+              <button onClick={handleSaveContract} className="py-3.5 sm:py-4 bg-indigo-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all hover:scale-[1.02] min-h-[44px]">Confirm</button>
             </div>
           </div>
         </div>

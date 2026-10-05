@@ -8,7 +8,7 @@ import {
   ArrowUpRight, Wallet, AlertCircle, X, Banknote, Activity
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 // --- COMPONENTS ---
 const StatCard = ({ label, value, sub, icon: Icon, color = "slate", trend }) => (
@@ -219,17 +219,17 @@ export default function Sales() {
     <div className="space-y-8 animate-in fade-in duration-700 pb-24 max-w-7xl mx-auto font-sans relative">
       
       {/* 🚀 HEADER & CONTROLS */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-2 border-slate-900 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b-2 border-slate-900 pb-6">
         <div>
-           <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">
+           <h1 className="text-2xl sm:text-4xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">
              Financial Command
            </h1>
-           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-3">
+           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2 sm:mt-3">
              Restaurant Net Earnings & Sales
            </p>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
            <div className="hidden lg:flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
               {['7 Days', '1 Month', '6 Months', 'All Time'].map(p => (
                  <button
@@ -250,7 +250,7 @@ export default function Sales() {
            <button 
               onClick={() => setIsWithdrawModalOpen(true)}
               disabled={data?.net_earnings <= 0}
-              className="flex items-center gap-2 px-8 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-emerald-500/20"
+              className="flex items-center justify-center gap-2 px-6 sm:px-8 py-3 bg-slate-900 text-white rounded-xl sm:rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-emerald-500/20 min-h-[44px] w-full sm:w-auto"
            >
               <Banknote size={16} /> Cash Out
            </button>
@@ -258,15 +258,15 @@ export default function Sales() {
       </div>
 
       {/* Mobile Time Filters */}
-      <div className="flex lg:hidden overflow-x-auto bg-slate-100 p-1.5 rounded-2xl border border-slate-200 w-full">
+      <div className="flex lg:hidden overflow-x-auto bg-slate-100 p-1 sm:p-1.5 rounded-xl sm:rounded-2xl border border-slate-200 w-full">
           {['7 Days', '1 Month', '6 Months', 'All Time'].map(p => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={`flex-1 whitespace-nowrap px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all duration-300 ${
+                className={`flex-1 whitespace-nowrap px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] font-black uppercase transition-all duration-300 min-h-[38px] ${
                   period === p 
                     ? 'bg-white text-emerald-700 shadow-sm scale-100' 
-                    : 'text-slate-400 hover:text-slate-600 scale-95 hover:scale-100'
+                    : 'text-slate-400 hover:text-slate-600'
                 }`}
               >
                 {p}
@@ -275,7 +275,7 @@ export default function Sales() {
       </div>
 
       {/* 💵 KPI CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <StatCard 
             label="Available Balance" 
             value={`${(data?.net_earnings || 0).toLocaleString()} XAF`}
@@ -306,21 +306,21 @@ export default function Sales() {
         />
       </div>
 
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-6 sm:gap-8">
         
         {/* 📈 MAIN CHART */}
-        <div className="col-span-12 lg:col-span-8 bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl relative overflow-hidden flex flex-col">
-           <div className="flex justify-between items-center mb-10">
+        <div className="col-span-12 lg:col-span-8 bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[40px] border border-slate-100 shadow-xl relative overflow-hidden flex flex-col">
+           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 sm:mb-10">
               <div>
-                  <h3 className="text-slate-900 font-black text-2xl uppercase tracking-tighter italic">Net Profit Trend</h3>
+                  <h3 className="text-slate-900 font-black text-xl sm:text-2xl uppercase tracking-tighter italic">Net Profit Trend</h3>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Food Sales • {period} View</p>
               </div>
-              <div className="px-5 py-2.5 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl text-xs font-black uppercase tracking-wider shadow-sm flex items-center gap-2">
+              <div className="px-4 sm:px-5 py-2 sm:py-2.5 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl text-xs font-black uppercase tracking-wider shadow-sm flex items-center gap-2">
                  <TrendingUp size={14} /> + {chartData.reduce((a,b) => a + b.value, 0).toLocaleString()} XAF
               </div>
            </div>
 
-           <div className="flex-1 w-full min-h-[350px]">
+           <div className="flex-1 w-full min-h-[260px] sm:min-h-[350px]">
              <ResponsiveContainer width="100%" height="100%">
                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                  <defs>
@@ -360,44 +360,44 @@ export default function Sales() {
         </div>
 
         {/* 📜 RECENT SETTLED ORDERS */}
-        <div className="col-span-12 lg:col-span-4 bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl flex flex-col">
-            <div className="flex justify-between items-center mb-8">
+        <div className="col-span-12 lg:col-span-4 bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[40px] border border-slate-100 shadow-xl flex flex-col">
+            <div className="flex justify-between items-center mb-6 sm:mb-8">
                <div>
-                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter italic">Settled Ledger</h3>
+                  <h3 className="text-lg sm:text-xl font-black text-slate-900 uppercase tracking-tighter italic">Settled Ledger</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Recent Transactions</p>
                </div>
-               <button className="w-10 h-10 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center transition-colors shadow-sm border border-slate-200">
+               <button className="w-9 h-9 sm:w-10 sm:h-10 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl sm:rounded-2xl flex items-center justify-center transition-colors shadow-sm border border-slate-200">
                   <ArrowUpRight size={18} />
                </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar max-h-[400px]">
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1 sm:pr-2 custom-scrollbar max-h-[400px]">
                 {data?.orders?.filter(o => o.status === 'DELIVERED').slice(0, 10).map((order) => (
-                    <div key={order.id} className="flex justify-between items-center p-4 hover:bg-slate-50 rounded-2xl transition-colors cursor-default group border border-transparent hover:border-slate-100">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-600 shadow-sm group-hover:scale-110 transition-transform">
-                                <DollarSign size={20} strokeWidth={3} />
+                    <div key={order.id} className="flex justify-between items-center p-3 sm:p-4 hover:bg-slate-50 rounded-xl sm:rounded-2xl transition-colors cursor-default group border border-transparent hover:border-slate-100 gap-2">
+                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-600 shadow-sm shrink-0">
+                                <DollarSign size={18} strokeWidth={3} />
                             </div>
-                            <div>
-                                <p className="text-sm font-black text-slate-900 group-hover:text-emerald-700 transition-colors">#{order.ticket_number}</p>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5 flex items-center gap-1">
-                                   <Clock size={10} /> {new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            <div className="min-w-0">
+                                <p className="text-xs sm:text-sm font-black text-slate-900 group-hover:text-emerald-700 transition-colors truncate">#{order.ticket_number}</p>
+                                <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase mt-0.5 flex items-center gap-1 truncate">
+                                   <Clock size={10} className="shrink-0" /> {new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                 </p>
                             </div>
                         </div>
-                        <div className="text-right">
-                            <p className="text-sm font-black text-emerald-600">+{Number(order.restaurant_profit || 0).toLocaleString()} XAF</p>
+                        <div className="text-right shrink-0">
+                            <p className="text-xs sm:text-sm font-black text-emerald-600">+{Number(order.restaurant_profit || 0).toLocaleString()} XAF</p>
                             <div className="flex items-center justify-end gap-1.5 mt-1">
                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                               <p className="text-[9px] text-slate-400 font-black uppercase tracking-wider">Settled</p>
+                               <p className="text-[8px] sm:text-[9px] text-slate-400 font-black uppercase tracking-wider">Settled</p>
                             </div>
                         </div>
                     </div>
                 ))}
                 
                 {(!data?.orders || data.orders.filter(o => o.status === 'DELIVERED').length === 0) && (
-                    <div className="text-center py-16 border-2 border-dashed border-slate-100 rounded-[32px] bg-slate-50/50">
-                        <Wallet size={40} className="mx-auto text-slate-300 mb-3" />
+                    <div className="text-center py-12 sm:py-16 border-2 border-dashed border-slate-100 rounded-2xl sm:rounded-[32px] bg-slate-50/50">
+                        <Wallet size={36} className="mx-auto text-slate-300 mb-2 sm:mb-3" />
                         <p className="text-slate-400 text-xs font-black uppercase tracking-widest">No settled orders yet</p>
                         <p className="text-slate-400 text-[10px] font-bold mt-1">Completed orders will appear here.</p>
                     </div>
@@ -408,22 +408,22 @@ export default function Sales() {
 
       {/* 🛑 CASH OUT MODAL */}
       {isWithdrawModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in" onClick={() => !isSubmitting && setIsWithdrawModalOpen(false)} />
           
-          <div className="bg-white rounded-[32px] w-full max-w-md relative z-10 shadow-2xl animate-in zoom-in-95 border border-slate-100 overflow-hidden">
+          <div className="bg-white rounded-2xl sm:rounded-[32px] w-full max-w-md relative z-10 shadow-2xl animate-in zoom-in-95 border border-slate-100 overflow-hidden max-h-[90vh] flex flex-col">
             
-            <div className="p-8 bg-slate-900 text-white flex justify-between items-center">
+            <div className="p-5 sm:p-8 bg-slate-900 text-white flex justify-between items-center shrink-0">
               <div>
-                <h3 className="text-2xl font-black uppercase italic tracking-tighter">Request Payout</h3>
+                <h3 className="text-xl sm:text-2xl font-black uppercase italic tracking-tighter">Request Payout</h3>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mt-1">Available: {(data?.net_earnings || 0).toLocaleString()} XAF</p>
               </div>
-              <button onClick={() => !isSubmitting && setIsWithdrawModalOpen(false)} className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-                <X size={20} />
+              <button onClick={() => !isSubmitting && setIsWithdrawModalOpen(false)} className="w-9 h-9 sm:w-10 sm:h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                <X size={18} />
               </button>
             </div>
 
-            <div className="p-8">
+            <div className="p-5 sm:p-8 overflow-y-auto flex-1">
               {!hasMoMoDetails ? (
                 <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center">
                    <AlertCircle className="mx-auto text-rose-500 mb-3" size={36} />

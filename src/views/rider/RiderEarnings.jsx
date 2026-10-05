@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Wallet, TrendingUp, History, Calendar, CheckCircle2, Loader2, ShieldCheck } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 export default function RiderEarnings() {
   const [rider, setRider] = useState(null);
@@ -38,17 +38,17 @@ export default function RiderEarnings() {
   if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-slate-900" /></div>;
 
   return (
-    <div className="max-w-[480px] mx-auto space-y-6 pb-24 px-4 font-sans pt-6">
+    <div className="max-w-[480px] mx-auto space-y-5 sm:space-y-6 pb-24 px-3 sm:px-4 font-sans pt-4 sm:pt-6">
       
       {/* WALLET */}
-      <div className="bg-slate-900 p-8 rounded-[40px] text-white shadow-2xl relative overflow-hidden">
+      <div className="bg-slate-900 p-6 sm:p-8 rounded-3xl sm:rounded-[40px] text-white shadow-2xl relative overflow-hidden">
         <div className="flex justify-between items-start mb-4">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Total Balance</p>
             <div className="bg-emerald-500/20 p-2 rounded-full"><Wallet size={20} className="text-emerald-400"/></div>
         </div>
-        <h3 className="text-4xl font-black italic tracking-tighter mb-2">{rider?.wallet_balance?.toLocaleString() || 0} FRS</h3>
+        <h3 className="text-3xl sm:text-4xl font-black italic tracking-tighter mb-2">{rider?.wallet_balance?.toLocaleString() || 0} FRS</h3>
         <p className="text-[10px] text-slate-400 mb-6">Available for withdrawal</p>
-        <button className="w-full bg-white text-slate-900 py-3 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-emerald-50 transition-colors">Request Payout</button>
+        <button className="w-full bg-white text-slate-900 py-3.5 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-emerald-50 transition-colors min-h-[44px]">Request Payout</button>
         <div className="flex items-center gap-2 mt-6 justify-center opacity-50">
            <ShieldCheck size={10} className="text-emerald-400" />
            <span className="text-[8px] font-black uppercase tracking-wider">Secured by Pawapay</span>

@@ -3,8 +3,7 @@ import {
   Shield, CheckCircle, FileText, User, 
   MapPin, Phone, Loader2, ChefHat, Bike, Wallet, Maximize2, X, FileCheck
 } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+import { API_URL, DEFAULT_ZONES, fetchSafeZones } from '../config';
 
 // 🔗 HELPER: Convert relative backend paths to full URLs for viewing
 const getFileUrl = (path) => {
@@ -86,14 +85,14 @@ const ApplicantCard = ({ app, type, zones, onApprove, onReject, processingId, op
     <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm hover:shadow-xl transition-shadow flex flex-col overflow-hidden">
       
       {/* 1. HEADER INFO */}
-      <div className="p-6 border-b border-slate-100 flex gap-4 items-start bg-slate-50/50">
-        <div className={`w-16 h-16 rounded-[20px] flex items-center justify-center text-2xl font-black shadow-sm ${
+      <div className="p-4 sm:p-6 border-b border-slate-100 flex gap-4 items-start bg-slate-50/50">
+        <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[20px] flex items-center justify-center text-xl sm:text-2xl font-black shadow-sm shrink-0 ${
             type === 'RESTAURANT' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'
         }`}>
             {app.name.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-black text-lg text-slate-900 truncate">{app.name}</h3>
+          <h3 className="font-black text-base sm:text-lg text-slate-900 truncate">{app.name}</h3>
           <div className="flex flex-col mt-1 gap-1.5">
               <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 truncate">
                 <User size={12} className="shrink-0 text-slate-400" /> {app.owner || app.name}
@@ -111,7 +110,7 @@ const ApplicantCard = ({ app, type, zones, onApprove, onReject, processingId, op
       </div>
 
       {/* 2. MOMO DETAILS (Highly Visible) */}
-      <div className="px-6 py-4 bg-emerald-50/50 border-b border-emerald-100/50">
+      <div className="px-4 sm:px-6 py-4 bg-emerald-50/50 border-b border-emerald-100/50">
         <div className="flex items-center justify-between mb-2">
            <p className="text-[9px] font-black uppercase text-emerald-600 tracking-widest flex items-center gap-1.5">
               <Wallet size={12} /> Payout MoMo
@@ -129,11 +128,11 @@ const ApplicantCard = ({ app, type, zones, onApprove, onReject, processingId, op
       </div>
 
       {/* 3. DOCUMENT GALLERY */}
-      <div className="p-6 border-b border-slate-100">
+      <div className="p-4 sm:p-6 border-b border-slate-100">
         <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-3 flex items-center gap-1.5">
           <FileCheck size={12} /> Verification Docs
         </p>
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3">
           <DocumentThumbnail label="ID Front" url={app.id_card_front_url} />
           <DocumentThumbnail label="ID Back" url={app.id_card_back_url} />
           {type === 'RIDER' && <DocumentThumbnail label="License" url={app.license_url} />}
@@ -141,16 +140,16 @@ const ApplicantCard = ({ app, type, zones, onApprove, onReject, processingId, op
       </div>
 
       {/* 4. INLINE APPROVAL CONTROLS */}
-      <div className="p-6 bg-slate-50 mt-auto">
-        <div className="flex gap-3 mb-4">
+      <div className="p-4 sm:p-6 bg-slate-50 mt-auto">
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
            {/* Commission Input */}
-           <div className="w-1/3">
+           <div className="w-full sm:w-1/3">
              <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest block mb-1.5">Split (%)</label>
              <input 
                type="number" 
                value={rate} 
                onChange={(e) => setRate(e.target.value)} 
-               className="w-full bg-white border-2 border-slate-200 rounded-xl py-2 px-3 font-black text-sm text-indigo-600 outline-none focus:border-indigo-500 text-center"
+               className="w-full bg-white border-2 border-slate-200 rounded-xl py-2 px-3 font-black text-sm text-indigo-600 outline-none focus:border-indigo-500 text-center min-h-[44px]"
              />
            </div>
            
@@ -161,7 +160,7 @@ const ApplicantCard = ({ app, type, zones, onApprove, onReject, processingId, op
                <select 
                  value={selectedZone} 
                  onChange={(e) => setSelectedZone(e.target.value)}
-                 className="w-full bg-white border-2 border-slate-200 rounded-xl py-2 px-3 font-bold text-xs text-slate-700 outline-none focus:border-indigo-500"
+                 className="w-full bg-white border-2 border-slate-200 rounded-xl py-2 px-3 font-bold text-xs text-slate-700 outline-none focus:border-indigo-500 min-h-[44px]"
                >
                  <option value="" disabled>Select Zone</option>
                  {zones.map(z => <option key={z.id} value={z.id}>{z.name}</option>)}
@@ -175,14 +174,14 @@ const ApplicantCard = ({ app, type, zones, onApprove, onReject, processingId, op
           <button 
             onClick={() => onReject(app.id, type)}
             disabled={isProcessing}
-            className="w-1/3 py-3 rounded-xl bg-white border-2 border-rose-100 text-rose-500 hover:bg-rose-50 hover:border-rose-200 font-black text-[10px] uppercase tracking-widest transition-all"
+            className="w-1/3 py-3 rounded-xl bg-white border-2 border-rose-100 text-rose-500 hover:bg-rose-50 hover:border-rose-200 font-black text-[10px] uppercase tracking-widest transition-all min-h-[44px]"
           >
             Reject
           </button>
           <button 
             onClick={() => onApprove(app.id, type, rate, selectedZone)}
             disabled={isProcessing || (type === 'RESTAURANT' && !selectedZone)}
-            className="flex-1 py-3 rounded-xl bg-slate-900 text-white hover:bg-indigo-600 font-black text-[10px] uppercase tracking-widest shadow-lg hover:shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 py-3 rounded-xl bg-slate-900 text-white hover:bg-indigo-600 font-black text-[10px] uppercase tracking-widest shadow-lg hover:shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
           >
             {isProcessing ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
             Approve Partner
@@ -197,7 +196,7 @@ const ApplicantCard = ({ app, type, zones, onApprove, onReject, processingId, op
 // --- MAIN PAGE ---
 export default function Approvals() {
   const [data, setData] = useState({ restaurants: [], riders: [] });
-  const [zones, setZones] = useState([]);
+  const [zones, setZones] = useState(DEFAULT_ZONES);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('RESTAURANTS'); 
   const [processingId, setProcessingId] = useState(null);
@@ -206,15 +205,15 @@ export default function Approvals() {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const [resApps, resZones] = await Promise.all([
-        fetch(`${API_URL}/admin/approvals/pending`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`${API_URL}/zones`)
+      const [resApps, safeZones] = await Promise.all([
+        fetch(`${API_URL}/admin/approvals/pending`, { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null),
+        fetchSafeZones().catch(() => DEFAULT_ZONES)
       ]);
 
-      if (resApps.ok) setData(await resApps.json());
-      if (resZones.ok) setZones(await resZones.json());
-    } catch (error) {
-      console.error("Sync Error:", error);
+      if (resApps && resApps.ok) setData(await resApps.json());
+      if (safeZones && safeZones.length > 0) setZones(safeZones);
+    } catch {
+      // Graceful sync fallback
     } finally {
       setLoading(false);
     }
@@ -273,19 +272,19 @@ export default function Approvals() {
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 pb-20 font-sans">
       
       {/* 🛡️ HEADER */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end border-b-2 border-slate-900 pb-6 gap-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end border-b-2 border-slate-900 pb-6 gap-4">
         <div>
-           <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">
+           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">
               Gatekeeper
            </h1>
            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">
               Review & Onboard New Partners
            </p>
         </div>
-        <div className="flex gap-2 bg-slate-100 p-1.5 rounded-2xl w-max">
+        <div className="flex gap-2 bg-slate-100 p-1.5 rounded-2xl w-full sm:w-max overflow-x-auto justify-start sm:justify-start">
            <button 
              onClick={() => setActiveTab('RESTAURANTS')}
-             className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+             className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 whitespace-nowrap min-h-[44px] ${
                activeTab === 'RESTAURANTS' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900'
              }`}
            >
@@ -293,7 +292,7 @@ export default function Approvals() {
            </button>
            <button 
              onClick={() => setActiveTab('RIDERS')}
-             className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+             className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 whitespace-nowrap min-h-[44px] ${
                activeTab === 'RIDERS' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900'
              }`}
            >

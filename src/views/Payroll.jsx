@@ -4,7 +4,7 @@ import {
   Loader2, RefreshCw, Send, AlertTriangle, Search, Smartphone
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 export default function Payroll() {
   const [riders, setRiders] = useState([]);
@@ -80,12 +80,12 @@ export default function Payroll() {
     <div className="space-y-8 animate-in fade-in duration-500 pb-20 max-w-7xl mx-auto font-sans">
       
       {/* 💸 HEADER */}
-      <div className="flex justify-between items-end border-b-2 border-slate-900 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b-2 border-slate-900 pb-6 gap-4">
         <div>
-           <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">Fleet Payroll</h1>
+           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">Fleet Payroll</h1>
            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">Logistics Batch Disbursement</p>
         </div>
-        <div className="bg-indigo-50 text-indigo-700 px-6 py-3 rounded-2xl border border-indigo-100 flex items-center gap-3">
+        <div className="bg-indigo-50 text-indigo-700 px-5 sm:px-6 py-3 rounded-2xl border border-indigo-100 flex items-center gap-3">
             <ShieldCheck size={20} />
             <div>
                <p className="text-[9px] font-black uppercase tracking-widest text-indigo-400">Payroll System</p>
@@ -96,20 +96,20 @@ export default function Payroll() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* TOTAL OWED CARD */}
-        <div className="bg-slate-900 text-white p-8 rounded-[32px] shadow-2xl relative overflow-hidden group md:col-span-2 flex flex-col justify-center">
+        <div className="bg-slate-900 text-white p-5 sm:p-8 rounded-2xl sm:rounded-[32px] shadow-2xl relative overflow-hidden group md:col-span-2 flex flex-col justify-center">
             <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Banknote size={100} />
             </div>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Total Fleet Liability</p>
-            <h3 className="text-5xl font-black tracking-tighter">
+            <h3 className="text-3xl sm:text-5xl font-black tracking-tighter">
               {totalOwed.toLocaleString()} <span className="text-lg text-slate-500">XAF</span>
             </h3>
             
-            <div className="mt-8 flex gap-4">
+            <div className="mt-6 sm:mt-8 flex gap-4">
                 <button 
                   onClick={handleExecutePayroll}
                   disabled={processing || pendingPayroll.length === 0}
-                  className="bg-emerald-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto bg-emerald-500 text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                 >
                   {processing ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                   Execute Batch Payroll
@@ -118,7 +118,7 @@ export default function Payroll() {
         </div>
 
         {/* STATS CARD */}
-        <div className="bg-white border-2 border-slate-100 p-8 rounded-[32px] shadow-lg flex flex-col justify-center">
+        <div className="bg-white border-2 border-slate-100 p-5 sm:p-8 rounded-2xl sm:rounded-[32px] shadow-lg flex flex-col justify-center">
             <div className="flex items-center gap-4 mb-6">
                 <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
                     <Users size={24} />
@@ -140,13 +140,13 @@ export default function Payroll() {
       </div>
 
       {/* 📋 PAYROLL QUEUE */}
-      <div className="bg-white rounded-[40px] border border-slate-100 shadow-xl overflow-hidden mt-4">
-        <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+      <div className="bg-white rounded-2xl sm:rounded-[40px] border border-slate-100 shadow-xl overflow-hidden mt-4">
+        <div className="p-4 sm:p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
           <div>
-            <h3 className="text-xl font-black text-slate-900 uppercase italic flex items-center gap-2">
+            <h3 className="text-lg sm:text-xl font-black text-slate-900 uppercase italic flex items-center gap-2">
               <Users className="text-blue-500" /> Pending Disbursements
             </h3>
-            <button onClick={fetchRiders} className="mt-2 px-3 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-black uppercase text-slate-500 hover:bg-slate-50 transition-colors flex items-center gap-1 shadow-sm">
+            <button onClick={fetchRiders} className="mt-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[9px] font-black uppercase text-slate-500 hover:bg-slate-50 transition-colors flex items-center gap-1 shadow-sm min-h-[36px]">
                 <RefreshCw size={10} /> Sync Rider Wallets
             </button>
           </div>
@@ -158,29 +158,29 @@ export default function Payroll() {
               placeholder="Search rider name or phone..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border-2 border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-xs font-bold text-slate-900 outline-none focus:border-blue-500 transition-colors"
+              className="w-full bg-white border-2 border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-xs font-bold text-slate-900 outline-none focus:border-blue-500 transition-colors min-h-[44px]"
             />
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="py-4 px-8 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rider Identity</th>
-                <th className="py-4 px-8 text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact / MoMo</th>
-                <th className="py-4 px-8 text-[10px] font-black text-slate-400 uppercase tracking-widest">Zone</th>
-                <th className="py-4 px-8 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Owed Amount (XAF)</th>
+                <th className="py-3.5 sm:py-4 px-4 sm:px-8 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Rider Identity</th>
+                <th className="py-3.5 sm:py-4 px-4 sm:px-8 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Contact / MoMo</th>
+                <th className="py-3.5 sm:py-4 px-4 sm:px-8 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Zone</th>
+                <th className="py-3.5 sm:py-4 px-4 sm:px-8 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right whitespace-nowrap">Owed Amount (XAF)</th>
               </tr>
             </thead>
             <tbody>
               {filteredPayroll.length > 0 ? filteredPayroll.map((rider) => (
                 <tr key={rider.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
-                  <td className="py-5 px-8">
+                  <td className="py-4 sm:py-5 px-4 sm:px-8">
                     <p className="text-sm font-black text-slate-900 uppercase">{rider.name}</p>
                     <p className="text-[10px] font-bold text-emerald-500 uppercase mt-1">Status: Active</p>
                   </td>
-                  <td className="py-5 px-8">
+                  <td className="py-4 sm:py-5 px-4 sm:px-8">
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-xl bg-slate-100 text-slate-600">
                         <Smartphone size={16} />
@@ -188,13 +188,13 @@ export default function Payroll() {
                       <p className="text-xs font-black text-slate-900">{rider.phone || "No Phone Registered"}</p>
                     </div>
                   </td>
-                  <td className="py-5 px-8">
+                  <td className="py-4 sm:py-5 px-4 sm:px-8">
                     <span className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest">
                         {rider.current_zone || "Global"}
                     </span>
                   </td>
-                  <td className="py-5 px-8 text-right">
-                    <span className="text-lg font-black text-slate-900">{rider.wallet_balance.toLocaleString()}</span>
+                  <td className="py-4 sm:py-5 px-4 sm:px-8 text-right">
+                    <span className="text-base sm:text-lg font-black text-slate-900">{rider.wallet_balance.toLocaleString()}</span>
                   </td>
                 </tr>
               )) : (

@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Bell, ChevronDown, Shield, LogOut, 
-  User, Store, Bike, CreditCard, X 
+  User, Store, Bike, CreditCard, X, Menu 
 } from 'lucide-react';
 import { io } from 'socket.io-client';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 const BASE_URL = API_URL.replace('/api', '');
 
 // 🎧 GLOBAL LOUD AUDIO ENGINE (No MP3 files needed!)
@@ -38,7 +38,7 @@ const initGlobalAudio = () => {
   }
 };
 
-export default function Header({ activeView, userRole, identity, onLogout }) {
+export default function Header({ activeView, userRole, identity, onLogout, onToggleMobileMenu, mobileMenuOpen }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const profileRef = useRef(null);
@@ -228,20 +228,31 @@ export default function Header({ activeView, userRole, identity, onLogout }) {
   const badge = getRoleBadge();
 
   return (
-    <header className="flex justify-between items-center mb-8 relative z-20">
+    <header className="flex justify-between items-center mb-6 sm:mb-8 relative z-20 gap-3">
       
-      {/* 📍 LEFT: BREADCRUMBS */}
-      <div>
-        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
-          <span>Portal</span>
-          <span className="text-slate-300">/</span>
-          <span className="text-indigo-600">{userRole}</span>
+      {/* 📍 LEFT: HAMBURGER & BREADCRUMBS */}
+      <div className="flex items-center gap-3 min-w-0">
+        {userRole !== 'rider' && (
+          <button
+            onClick={onToggleMobileMenu}
+            aria-label="Toggle Navigation Menu"
+            className="lg:hidden p-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors shadow-sm shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        )}
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5 truncate">
+            <span>Portal</span>
+            <span className="text-slate-300">/</span>
+            <span className="text-indigo-600 truncate">{userRole}</span>
+          </div>
+          <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight truncate">{activeView}</h2>
         </div>
-        <h2 className="text-2xl font-black text-slate-900 tracking-tight">{activeView}</h2>
       </div>
 
       {/* 👉 RIGHT: ACTIONS & SMART PILL */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 shrink-0">
         
         {/* 🔔 THE NOTIFICATION ENGINE */}
         <div className="relative" ref={notifRef}>
@@ -250,7 +261,8 @@ export default function Header({ activeView, userRole, identity, onLogout }) {
                 setIsNotificationsOpen(!isNotificationsOpen);
                 if (isProfileOpen) setIsProfileOpen(false);
              }}
-             className={`w-10 h-10 border rounded-xl flex items-center justify-center transition-all shadow-sm relative ${
+             aria-label="Notifications"
+             className={`w-10 h-10 border rounded-xl flex items-center justify-center transition-all shadow-sm relative min-h-[44px] min-w-[44px] ${
                 isNotificationsOpen ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-100'
              }`}
           >
@@ -264,7 +276,7 @@ export default function Header({ activeView, userRole, identity, onLogout }) {
 
           {/* 📥 NOTIFICATIONS DROPDOWN */}
           {isNotificationsOpen && (
-              <div className="absolute top-full right-0 mt-3 w-80 bg-white rounded-[24px] border border-slate-100 shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200">
+              <div className="absolute top-full right-0 mt-3 w-[calc(100vw-2rem)] max-w-sm sm:w-80 bg-white rounded-[24px] border border-slate-100 shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50">
                   <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                       <div>
                           <h3 className="text-sm font-black text-slate-900 uppercase italic">Notifications</h3>
@@ -315,14 +327,14 @@ export default function Header({ activeView, userRole, identity, onLogout }) {
                 setIsProfileOpen(!isProfileOpen);
                 if (isNotificationsOpen) setIsNotificationsOpen(false);
             }}
-            className={`flex items-center gap-3 pl-4 pr-3 py-2 rounded-xl border transition-all duration-300 ${
+            className={`flex items-center gap-2 sm:gap-3 pl-2.5 sm:pl-4 pr-2 sm:pr-3 py-1.5 sm:py-2 rounded-xl border transition-all duration-300 min-h-[44px] ${
               isProfileOpen 
                 ? 'bg-slate-900 border-slate-900 text-white shadow-xl' 
                 : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
             }`}
           >
-            {/* Text Only Identity */}
-            <div className="text-right">
+            {/* Text Identity on sm+ screens */}
+            <div className="text-right hidden sm:block">
               <p className={`text-xs font-black uppercase tracking-wide leading-none ${isProfileOpen ? 'text-white' : 'text-slate-900'}`}>
                 {identity}
               </p>
@@ -330,16 +342,21 @@ export default function Header({ activeView, userRole, identity, onLogout }) {
                 {badge.label}
               </p>
             </div>
+
+            {/* Mobile Icon Badge */}
+            <div className={`sm:hidden w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black ${badge.bg} ${badge.text}`}>
+              {identity.charAt(0).toUpperCase()}
+            </div>
             
             {/* Chevron Toggles State */}
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-300 ${isProfileOpen ? 'rotate-180 bg-slate-800 text-white' : 'bg-slate-100 text-slate-400'}`}>
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-transform duration-300 ${isProfileOpen ? 'rotate-180 bg-slate-800 text-white' : 'bg-slate-100 text-slate-400'}`}>
                <ChevronDown size={14} strokeWidth={3} />
             </div>
           </button>
 
           {/* 🔽 EXPANDED DETAILS */}
           {isProfileOpen && (
-            <div className="absolute top-full right-0 mt-3 w-72 bg-white rounded-[24px] border border-slate-100 shadow-2xl p-5 animate-in slide-in-from-top-2 fade-in duration-200 overflow-hidden">
+            <div className="absolute top-full right-0 mt-3 w-[calc(100vw-2rem)] max-w-xs sm:w-72 bg-white rounded-[24px] border border-slate-100 shadow-2xl p-5 animate-in slide-in-from-top-2 fade-in duration-200 overflow-hidden z-50">
                
                <div className={`absolute top-0 left-0 w-full h-1.5 ${badge.bg}`} />
 
@@ -351,8 +368,8 @@ export default function Header({ activeView, userRole, identity, onLogout }) {
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${badge.bg} ${badge.text}`}>
                            {badge.icon}
                         </div>
-                        <div>
-                           <p className="text-xs font-black text-slate-900">{identity}</p>
+                        <div className="min-w-0 flex-1">
+                           <p className="text-xs font-black text-slate-900 truncate">{identity}</p>
                            <p className="text-[10px] font-bold text-slate-400 uppercase">{userRole} Access</p>
                         </div>
                      </div>
@@ -371,7 +388,7 @@ export default function Header({ activeView, userRole, identity, onLogout }) {
                <div className="pt-4 border-t border-slate-100">
                   <button 
                     onClick={onLogout}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-rose-50 text-rose-600 font-black text-[10px] uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all"
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-rose-50 text-rose-600 font-black text-[10px] uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all min-h-[44px]"
                   >
                     <LogOut size={14} /> Sign Out
                   </button>

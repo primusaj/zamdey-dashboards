@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  LayoutDashboard, UtensilsCrossed, ChefHat, 
+  ShoppingBag, Settings as SettingsIcon, Bike, Wallet 
+} from 'lucide-react';
 
 // --- CORE COMPONENTS ---
 import Login from './views/Login'; 
@@ -37,7 +41,7 @@ import RiderDashboard from './views/rider/RiderDashboard';
 import RiderEarnings from './views/rider/RiderEarnings'; 
 
 // 🔗 CONFIG
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+import { API_URL, DEFAULT_ZONES, fetchSafeZones } from './config';
 
 export default function App() {
   
@@ -74,9 +78,10 @@ export default function App() {
   const [activeView, setActiveView] = useState(() => {
       return localStorage.getItem('zamdey_last_view') || 'Dashboard';
   });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // 🌍 GLOBAL STATE
-  const [locations, setLocations] = useState([]);
+  const [locations, setLocations] = useState(DEFAULT_ZONES);
   const [restaurantsList, setRestaurantsList] = useState([]); 
   const [platformSettings, setPlatformSettings] = useState(null); // 🚨 NEW: Global Settings State
   const [loading, setLoading] = useState(false);
@@ -85,6 +90,7 @@ export default function App() {
   useEffect(() => {
       if (activeView) {
           localStorage.setItem('zamdey_last_view', activeView);
+          setMobileMenuOpen(false); // Close mobile drawer when view changes
       }
   }, [activeView]);
 
@@ -105,10 +111,11 @@ export default function App() {
         setLoading(true);
         try {
           // 1. Fetch Zones
-          const zonesRes = await fetch(`${API_URL}/zones`);
-          if (zonesRes.ok) {
-             const zonesData = await zonesRes.json();
-             if (Array.isArray(zonesData)) setLocations(zonesData);
+          try {
+            const zonesData = await fetchSafeZones();
+            if (zonesData && zonesData.length > 0) setLocations(zonesData);
+          } catch {
+            // Keep default locations
           }
 
           // 2. Fetch Restaurants
@@ -223,16 +230,39 @@ export default function App() {
     <div className="flex min-h-screen bg-[#F8FAFC]">
       {/* SIDEBARS */}
       <div className="z-50 relative">
-        {role === 'admin' && <Sidebar activeView={activeView} setActiveView={setActiveView} />}
-        {role === 'vendor' && <VendorSidebar activeView={activeView} setActiveView={setActiveView} platformSettings={platformSettings} />}
+        {role === 'admin' && (
+          <Sidebar 
+            activeView={activeView} 
+            setActiveView={setActiveView} 
+            mobileOpen={mobileMenuOpen}
+            onClose={() => setMobileMenuOpen(false)}
+          />
+        )}
+        {role === 'vendor' && (
+          <VendorSidebar 
+            activeView={activeView} 
+            setActiveView={setActiveView} 
+            platformSettings={platformSettings}
+            mobileOpen={mobileMenuOpen}
+            onClose={() => setMobileMenuOpen(false)}
+          />
+        )}
       </div>
       
       {/* MAIN CONTENT AREA */}
-      <main className={`flex-1 p-10 relative z-0 ${role !== 'rider' ? 'ml-64' : 'ml-0'}`}>
-        <Header activeView={activeView} userRole={role} identity={identity} onLogout={handleLogout} platformSettings={platformSettings} />
+      <main className={`flex-1 p-3.5 sm:p-6 lg:p-8 relative z-0 transition-all ${role !== 'rider' ? 'lg:ml-64 ml-0' : 'ml-0'} ${role === 'vendor' || role === 'rider' ? 'pb-24 lg:pb-8' : 'pb-12 lg:pb-8'}`}>
+        <Header 
+          activeView={activeView} 
+          userRole={role} 
+          identity={identity} 
+          onLogout={handleLogout} 
+          platformSettings={platformSettings}
+          onToggleMobileMenu={() => setMobileMenuOpen(prev => !prev)}
+          mobileMenuOpen={mobileMenuOpen}
+        />
         
         {/* VIEW CONTAINER */}
-        <div className="mt-8">
+        <div className="mt-4 sm:mt-8">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-64 space-y-4">
                <div className="animate-spin w-8 h-8 border-4 border-slate-900 border-t-transparent rounded-full"></div>
@@ -241,12 +271,65 @@ export default function App() {
           ) : renderView()}
         </div>
         
-        {/* RIDER MOBILE BOTTOM NAV */}
+        {/* 🍳 VENDOR MOBILE QUICK-NAV */}
+        {role === 'vendor' && (
+          <nav 
+            aria-label="Vendor mobile navigation"
+            className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 flex justify-around items-center h-16 px-1 lg:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.05)]"
+          >
+            {[
+              { name: 'Dashboard', icon: <LayoutDashboard size={18} />, label: 'Overview' },
+              { name: 'Kitchen', icon: <UtensilsCrossed size={18} />, label: 'Kitchen' },
+              { name: 'Inventory', icon: <ChefHat size={18} />, label: 'Menu' },
+              { name: 'Sales', icon: <ShoppingBag size={18} />, label: 'Sales' },
+              { name: 'Settings', icon: <SettingsIcon size={18} />, label: 'Settings' },
+            ].map((tab) => {
+              const isActive = activeView === tab.name;
+              return (
+                <button
+                  key={tab.name}
+                  onClick={() => setActiveView(tab.name)}
+                  className={`flex flex-col items-center justify-center flex-1 h-full min-h-[44px] transition-colors ${
+                    isActive ? 'text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600 font-medium'
+                  }`}
+                >
+                  <span className={`${isActive ? 'scale-110' : ''} transition-transform`}>
+                    {tab.icon}
+                  </span>
+                  <span className="text-[9px] uppercase tracking-tight mt-1 leading-none">
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        )}
+
+        {/* 🏍️ RIDER MOBILE BOTTOM NAV */}
         {role === 'rider' && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-slate-900 z-50 flex justify-around p-4 md:hidden">
-              <button onClick={() => setActiveView('Dashboard')} className={`font-black text-[10px] uppercase ${activeView === 'Dashboard' ? 'text-emerald-600' : 'text-slate-400'}`}>Tasks</button>
-              <button onClick={() => setActiveView('Earnings')} className={`font-black text-[10px] uppercase ${activeView === 'Earnings' ? 'text-emerald-600' : 'text-slate-400'}`}>Wallet</button>
-          </div>
+          <nav 
+            aria-label="Rider mobile navigation"
+            className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 flex justify-around items-center h-16 px-4 md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.05)]"
+          >
+            <button 
+              onClick={() => setActiveView('Dashboard')} 
+              className={`flex flex-col items-center justify-center flex-1 h-full min-h-[44px] transition-colors ${
+                activeView === 'Dashboard' ? 'text-emerald-600 font-bold' : 'text-slate-400 hover:text-slate-600 font-medium'
+              }`}
+            >
+              <Bike size={20} className={activeView === 'Dashboard' ? 'scale-110' : ''} />
+              <span className="text-[10px] font-black uppercase tracking-widest mt-1">Missions</span>
+            </button>
+            <button 
+              onClick={() => setActiveView('Earnings')} 
+              className={`flex flex-col items-center justify-center flex-1 h-full min-h-[44px] transition-colors ${
+                activeView === 'Earnings' ? 'text-emerald-600 font-bold' : 'text-slate-400 hover:text-slate-600 font-medium'
+              }`}
+            >
+              <Wallet size={20} className={activeView === 'Earnings' ? 'scale-110' : ''} />
+              <span className="text-[10px] font-black uppercase tracking-widest mt-1">Wallet</span>
+            </button>
+          </nav>
         )}
       </main>
     </div>

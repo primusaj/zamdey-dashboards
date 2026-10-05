@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, MessageCircle } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 export default function AdminSettingsScreen() {
     const [phone, setPhone] = useState('');
@@ -78,9 +78,9 @@ export default function AdminSettingsScreen() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-slate-100">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">Platform Settings</h2>
-            <p className="text-slate-500 mb-8">
+        <div className="max-w-3xl mx-auto bg-white p-4 sm:p-8 rounded-2xl shadow-sm border border-slate-100">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3 sm:mb-6">Platform Settings</h2>
+            <p className="text-xs sm:text-sm text-slate-500 mb-6 sm:mb-8">
                 Update the central support contact numbers here. The mobile app will sync to these immediately for Live Chat and Call Support.
             </p>
 

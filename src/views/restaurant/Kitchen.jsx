@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Timer, CheckCircle, Package, AlertCircle, ChefHat, RefreshCw, Loader2, Radar, ArrowRight } from 'lucide-react';
 
 // 🔗 CONFIG: Point this to your backend
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 export default function Kitchen({ restaurantName }) {
   const [orders, setOrders] = useState([]);
@@ -103,9 +103,9 @@ export default function Kitchen({ restaurantName }) {
     <div className="space-y-8 animate-in fade-in duration-500 font-sans pb-24">
       
       {/* 🔝 KITCHEN HEADLINE */}
-      <div className="flex justify-between items-end border-b-2 border-slate-900 pb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end border-b-2 border-slate-900 pb-6 gap-4">
         <div>
-          <h2 className="text-slate-900 font-black text-2xl uppercase tracking-tighter leading-none mb-1">
+          <h2 className="text-slate-900 font-black text-xl sm:text-2xl uppercase tracking-tighter leading-none mb-1">
             Kitchen Rail
           </h2>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
@@ -113,14 +113,14 @@ export default function Kitchen({ restaurantName }) {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-lg border border-emerald-100 flex items-center gap-2">
+          <div className="bg-emerald-50 text-emerald-600 px-3.5 sm:px-4 py-2 rounded-lg border border-emerald-100 flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[9px] font-black uppercase tracking-widest">Live Connection</span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-6 sm:gap-8">
         
         {/* 🔥 ACTIVE PREP COLUMN */}
         <div className="col-span-12 lg:col-span-7 space-y-4">
@@ -130,20 +130,20 @@ export default function Kitchen({ restaurantName }) {
           
           {/* COMBINE PENDING & PREPARING FOR MAIN RAIL */}
           {[...pendingOrders, ...preparingOrders].map(order => (
-            <div key={order.id} className="bg-white border-2 border-slate-900 rounded-xl p-6 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] relative overflow-hidden">
-              <div className="flex justify-between items-start mb-6">
-                <div>
+            <div key={order.id} className="bg-white border-2 border-slate-900 rounded-xl p-4 sm:p-6 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] sm:shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] relative overflow-hidden">
+              <div className="flex justify-between items-start mb-4 sm:mb-6 gap-2">
+                <div className="min-w-0">
                   <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">#{order.ticket_number}</p>
-                  <h4 className="text-xl font-black text-slate-900 uppercase">
+                  <h4 className="text-lg sm:text-xl font-black text-slate-900 uppercase truncate">
                     {order.items?.length || 0} Items
                   </h4>
-                  <div className="mt-2 text-sm text-slate-600">
+                  <div className="mt-2 text-xs sm:text-sm text-slate-600 space-y-0.5">
                     {order.items?.map((i, idx) => (
                         <div key={idx}><span className="font-bold">{i.quantity}x</span> {i.menu_item?.name}</div>
                     ))}
                   </div>
                 </div>
-                <div className={`px-3 py-1 rounded font-black text-[9px] uppercase tracking-widest ${
+                <div className={`px-2.5 sm:px-3 py-1 rounded font-black text-[9px] uppercase tracking-widest shrink-0 ${
                   order.status === 'PREPARING' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'
                 }`}>
                   {order.status}
@@ -155,14 +155,14 @@ export default function Kitchen({ restaurantName }) {
                 {order.status === 'PENDING' || order.status === 'CONFIRMED' ? (
                   <button 
                     onClick={() => updateStatus(order.id, 'PREPARING')}
-                    className="flex-1 bg-slate-900 text-white py-4 rounded-lg font-black text-xs uppercase tracking-widest hover:bg-black transition-all"
+                    className="flex-1 bg-slate-900 text-white py-3.5 sm:py-4 rounded-lg font-black text-xs uppercase tracking-widest hover:bg-black transition-all min-h-[44px]"
                   >
                     Start Preparing
                   </button>
                 ) : (
                   <button 
                     onClick={() => updateStatus(order.id, 'READY_FOR_PICKUP')}
-                    className="flex-1 bg-indigo-600 text-white py-4 rounded-lg font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+                    className="flex-1 bg-indigo-600 text-white py-3.5 sm:py-4 rounded-lg font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 min-h-[44px]"
                   >
                     <CheckCircle size={16} /> Mark as Ready (Broadcast)
                   </button>

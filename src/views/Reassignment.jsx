@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 
 // 🔗 CONFIG: Point this to your backend
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 export default function Reassignment() {
   const [activeOrders, setActiveOrders] = useState([]);
@@ -88,9 +88,9 @@ export default function Reassignment() {
     <div className="space-y-6 animate-in fade-in duration-500 font-sans pb-24">
       
       {/* 🔝 HEADER */}
-      <div className="flex justify-between items-center border-b-2 border-slate-900 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b-2 border-slate-900 pb-6 gap-2">
         <div>
-          <h2 className="text-slate-900 font-black text-2xl uppercase tracking-tighter flex items-center gap-2">
+          <h2 className="text-slate-900 font-black text-xl sm:text-2xl uppercase tracking-tighter flex items-center gap-2">
               <ShieldAlert className="text-rose-600" /> Rescue Hub
           </h2>
           <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
@@ -99,10 +99,10 @@ export default function Reassignment() {
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-6 lg:gap-8">
         
         {/* 📦 LEFT: LIVE ASSIGNED ORDERS */}
-        <div className="col-span-5 space-y-4 h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar pr-2">
+        <div className="col-span-12 lg:col-span-5 space-y-4 max-h-[50vh] lg:max-h-none lg:h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar pr-2">
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Live Fleet Missions</h3>
           
           {activeOrders.map(order => {
@@ -159,17 +159,17 @@ export default function Reassignment() {
         </div>
 
         {/* 🏍️ RIGHT: TACTICAL OVERRIDE PANEL */}
-        <div className="col-span-7 bg-slate-900 rounded-2xl p-8 border-4 border-slate-800 shadow-2xl min-h-[500px] flex flex-col relative overflow-hidden">
+        <div className="col-span-12 lg:col-span-7 bg-slate-900 rounded-2xl p-5 sm:p-8 border-2 sm:border-4 border-slate-800 shadow-2xl min-h-[400px] flex flex-col relative overflow-hidden">
           
           {!selectedOrder ? (
-            <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-40">
+            <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-40 py-12">
               <ArrowRightLeft className="text-slate-500" size={64} />
               <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest max-w-[250px]">
                 Select a compromised mission from the queue to initiate override protocols
               </p>
             </div>
           ) : (
-            <div className="space-y-8 animate-in slide-in-from-right-4 z-10 relative">
+            <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 z-10 relative">
               
               <div className="flex items-center justify-between border-b border-slate-700 pb-4">
                 <h3 className="text-xs font-black text-rose-500 uppercase tracking-[0.2em] flex items-center gap-2">
@@ -177,15 +177,15 @@ export default function Reassignment() {
                 </h3>
                 <button 
                   onClick={() => setSelectedOrder(null)} 
-                  className="text-slate-400 hover:text-white uppercase text-[10px] font-black tracking-widest transition-colors"
+                  className="text-slate-400 hover:text-white uppercase text-[10px] font-black tracking-widest transition-colors min-h-[40px] px-2 flex items-center"
                 >
                   Abort Override
                 </button>
               </div>
 
               {/* MISSION VITALS */}
-              <div className="bg-slate-800 rounded-xl p-6 space-y-6 border border-slate-700">
-                  <div className="grid grid-cols-2 gap-6">
+              <div className="bg-slate-800 rounded-xl p-4 sm:p-6 space-y-6 border border-slate-700">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                       <div>
                           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Current Operative</p>
                           <div className="flex items-center gap-3">

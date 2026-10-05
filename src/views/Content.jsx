@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutGrid, Image as ImageIcon, Plus, Trash2, Loader2, Store, Megaphone, X, AlertCircle } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 // Helper to fix local image paths
 const formatImageUrl = (url) => {
     if (!url) return 'https://placehold.co/600x400';
@@ -178,21 +178,21 @@ export default function ContentManager() {
     <div className="space-y-8 animate-in fade-in duration-500 pb-20 max-w-7xl mx-auto font-sans">
       
       {/* 👑 HEADER */}
-      <div className="flex justify-between items-end border-b-2 border-slate-900 pb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end border-b-2 border-slate-900 pb-6 gap-4">
         <div>
-           <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">Content Command</h1>
+           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">Content Command</h1>
            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">Manage App Home Screen Banners & Categories</p>
         </div>
-        <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+        <div className="flex bg-slate-100 p-1 sm:p-1.5 rounded-2xl border border-slate-200 overflow-x-auto w-full sm:w-auto">
             <button 
                 onClick={() => setActiveTab('promotions')} 
-                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-2 ${activeTab === 'promotions' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap min-h-[44px] ${activeTab === 'promotions' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
             >
                 <Megaphone size={14} /> Banners
             </button>
             <button 
                 onClick={() => setActiveTab('categories')} 
-                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-2 ${activeTab === 'categories' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap min-h-[44px] ${activeTab === 'categories' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
             >
                 <LayoutGrid size={14} /> Categories
             </button>
@@ -202,27 +202,27 @@ export default function ContentManager() {
       {/* 🖼️ PROMOTIONS TAB */}
       {activeTab === 'promotions' && (
           <div>
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
                   <h3 className="text-xl font-black text-slate-900 uppercase italic">Active Promos</h3>
-                  <button onClick={() => setIsPromoModalOpen(true)} className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/20">
+                  <button onClick={() => setIsPromoModalOpen(true)} className="bg-indigo-600 text-white px-5 py-3 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/20 min-h-[44px]">
                       <Plus size={16} /> Add Banner
                   </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   {promotions.length === 0 && <p className="text-sm text-slate-400 font-bold">No banners added yet.</p>}
                   {promotions.map(promo => (
                       <div key={promo.id} className="relative rounded-[24px] overflow-hidden shadow-xl" style={{ backgroundColor: promo.color }}>
-                          <div className="p-8 flex justify-between items-center h-40">
-                              <div className="flex-1 pr-4 z-10">
-                                  <span className="bg-white/20 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-3 inline-block">PROMO</span>
-                                  <h4 className="text-2xl font-black text-white leading-tight">{promo.title}</h4>
-                                  <p className="text-sm text-white/80 font-medium mt-1">{promo.subtitle}</p>
-                                  {promo.restaurant && <p className="text-[10px] font-black uppercase text-white/60 mt-3 flex items-center gap-1"><Store size={12}/> {promo.restaurant.restaurant_name}</p>}
+                          <div className="p-5 sm:p-8 flex justify-between items-center min-h-[140px]">
+                              <div className="flex-1 pr-3 sm:pr-4 z-10 min-w-0">
+                                  <span className="bg-white/20 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-2 sm:mb-3 inline-block">PROMO</span>
+                                  <h4 className="text-xl sm:text-2xl font-black text-white leading-tight break-words">{promo.title}</h4>
+                                  <p className="text-xs sm:text-sm text-white/80 font-medium mt-1 truncate">{promo.subtitle}</p>
+                                  {promo.restaurant && <p className="text-[10px] font-black uppercase text-white/60 mt-2 sm:mt-3 flex items-center gap-1 truncate"><Store size={12} className="shrink-0"/> {promo.restaurant.restaurant_name}</p>}
                               </div>
-                              <img src={formatImageUrl(promo.image_url)} alt="Promo" className="w-24 h-24 object-contain z-10 drop-shadow-2xl" />
+                              <img src={formatImageUrl(promo.image_url)} alt="Promo" className="w-20 h-20 sm:w-24 sm:h-24 object-contain z-10 drop-shadow-2xl shrink-0" />
                           </div>
-                          <button onClick={() => handleDelete('promotions', promo.id)} className="absolute top-4 right-4 w-8 h-8 bg-black/20 hover:bg-rose-500 rounded-full flex items-center justify-center text-white transition-colors z-20">
+                          <button onClick={() => handleDelete('promotions', promo.id)} className="absolute top-3 sm:top-4 right-3 sm:right-4 w-8 h-8 bg-black/30 hover:bg-rose-500 rounded-full flex items-center justify-center text-white transition-colors z-20">
                               <Trash2 size={14} />
                           </button>
                       </div>
@@ -234,24 +234,24 @@ export default function ContentManager() {
       {/* 🗂️ CATEGORIES TAB */}
       {activeTab === 'categories' && (
           <div>
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
                   <h3 className="text-xl font-black text-slate-900 uppercase italic">Food Categories</h3>
-                  <button onClick={() => setIsCatModalOpen(true)} className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20">
+                  <button onClick={() => setIsCatModalOpen(true)} className="bg-emerald-600 text-white px-5 py-3 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20 min-h-[44px]">
                       <Plus size={16} /> Add Category
                   </button>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
                   {categories.map(cat => (
-                      <div key={cat.id} className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm flex flex-col items-center relative group hover:shadow-md transition-all">
-                          <button onClick={() => handleDelete('categories', cat.id)} className="absolute top-3 right-3 text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div key={cat.id} className="bg-white p-4 sm:p-6 rounded-[24px] border border-slate-100 shadow-sm flex flex-col items-center relative group hover:shadow-md transition-all">
+                          <button onClick={() => handleDelete('categories', cat.id)} className="absolute top-2.5 right-2.5 p-1.5 text-slate-400 hover:text-rose-500 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                               <Trash2 size={16} />
                           </button>
-                          <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-inner" style={{ backgroundColor: cat.color }}>
-                              <LayoutGrid size={28} style={{ color: cat.icon_color }} />
+                          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-3 sm:mb-4 shadow-inner" style={{ backgroundColor: cat.color }}>
+                              <LayoutGrid size={24} style={{ color: cat.icon_color }} />
                           </div>
-                          <h4 className="text-sm font-black text-slate-900 uppercase tracking-wide">{cat.name}</h4>
-                          <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase">Icon: {cat.icon}</p>
+                          <h4 className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wide text-center truncate w-full">{cat.name}</h4>
+                          <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase text-center truncate w-full">Icon: {cat.icon}</p>
                       </div>
                   ))}
               </div>
@@ -260,9 +260,9 @@ export default function ContentManager() {
 
       {/* 🚀 ADD PROMO MODAL */}
       {isPromoModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-            <div className="bg-white w-full max-w-lg rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95">
-                <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+            <div className="bg-white w-full max-w-lg rounded-2xl sm:rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] flex flex-col">
+                <div className="p-4 sm:p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center shrink-0">
                     <h3 className="text-xl font-black uppercase italic text-slate-900">Create Banner</h3>
                     <button onClick={closePromoModal} className="w-8 h-8 flex items-center justify-center bg-slate-200 text-slate-500 hover:bg-rose-100 hover:text-rose-500 rounded-full transition-colors"><X size={16} /></button>
                 </div>
@@ -274,7 +274,7 @@ export default function ContentManager() {
                     </div>
                 )}
 
-                <form onSubmit={handleCreatePromo} className="p-6 space-y-4">
+                <form onSubmit={handleCreatePromo} className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
                     <div>
                         <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Headline</label>
                         <input type="text" required value={promoForm.title} onChange={e => setPromoForm({...promoForm, title: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 outline-none focus:border-indigo-500 mt-1" placeholder="e.g. Free Delivery Weekend" />
@@ -283,7 +283,7 @@ export default function ContentManager() {
                         <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Subtitle</label>
                         <input type="text" value={promoForm.subtitle} onChange={e => setPromoForm({...promoForm, subtitle: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 outline-none focus:border-indigo-500 mt-1" placeholder="e.g. On all local dishes" />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Background Color</label>
                             <input type="color" value={promoForm.color} onChange={e => setPromoForm({...promoForm, color: e.target.value})} className="w-full h-12 rounded-xl cursor-pointer mt-1 border-0 p-0" />
@@ -317,7 +317,7 @@ export default function ContentManager() {
                             </div>
                         )}
                     </div>
-                    <button type="submit" disabled={isSubmitting} className="w-full py-4 mt-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2">
+                    <button type="submit" disabled={isSubmitting} className="w-full py-4 mt-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 min-h-[44px]">
                         {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "Publish Banner"}
                     </button>
                 </form>
@@ -327,21 +327,21 @@ export default function ContentManager() {
 
       {/* 🚀 ADD CATEGORY MODAL */}
       {isCatModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-            <div className="bg-white w-full max-w-sm rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95">
-                <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+            <div className="bg-white w-full max-w-sm rounded-2xl sm:rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95 max-h-[90vh] flex flex-col">
+                <div className="p-4 sm:p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center shrink-0">
                     <h3 className="text-xl font-black uppercase italic text-slate-900">Add Category</h3>
                     <button onClick={closeCatModal} className="w-8 h-8 flex items-center justify-center bg-slate-200 text-slate-500 hover:bg-rose-100 hover:text-rose-500 rounded-full transition-colors"><X size={16} /></button>
                 </div>
 
                 {errorMessage && (
-                    <div className="mx-6 mt-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3">
+                    <div className="mx-4 sm:mx-6 mt-4 sm:mt-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3">
                         <AlertCircle className="text-rose-500 shrink-0 mt-0.5" size={18} />
                         <p className="text-xs font-bold text-rose-700">{errorMessage}</p>
                     </div>
                 )}
 
-                <form onSubmit={handleCreateCategory} className="p-6 space-y-4">
+                <form onSubmit={handleCreateCategory} className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
                     <div>
                         <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Name</label>
                         <input type="text" required value={catForm.name} onChange={e => setCatForm({...catForm, name: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 outline-none focus:border-emerald-500 mt-1" placeholder="e.g. Burgers" />
@@ -361,7 +361,7 @@ export default function ContentManager() {
                             <input type="color" value={catForm.icon_color} onChange={e => setCatForm({...catForm, icon_color: e.target.value})} className="w-full h-12 rounded-xl cursor-pointer mt-1 border-0 p-0" />
                         </div>
                     </div>
-                    <button type="submit" disabled={isSubmitting} className="w-full py-4 mt-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2">
+                    <button type="submit" disabled={isSubmitting} className="w-full py-4 mt-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 min-h-[44px]">
                         {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "Save Category"}
                     </button>
                 </form>

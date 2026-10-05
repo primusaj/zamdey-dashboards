@@ -4,7 +4,7 @@ import {
   AlertTriangle, Radar, AlertOctagon, UserX, UserCheck
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 export default function Operations() {
   const [orders, setOrders] = useState([]);
@@ -76,17 +76,17 @@ export default function Operations() {
   const claimedOrders = orders.filter(o => o.status === 'ACCEPTED');
 
   return (
-    <div className="h-[calc(100vh-120px)] flex gap-6 font-sans text-slate-800">
+    <div className="flex flex-col lg:flex-row gap-6 font-sans text-slate-800 min-h-[calc(100vh-160px)] lg:h-[calc(100vh-140px)]">
       
       {/* ===================================================
           LEFT COL: BROADCASTING (Unclaimed)
       =================================================== */}
-      <div className="w-1/2 flex flex-col bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+      <div className="w-full lg:w-1/2 flex flex-col bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden min-h-[350px]">
         
         {/* Header */}
-        <div className="p-5 border-b border-indigo-100 bg-indigo-50/50 flex justify-between items-center">
+        <div className="p-4 sm:p-5 border-b border-indigo-100 bg-indigo-50/50 flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-black text-indigo-900 tracking-tight flex items-center gap-2">
+            <h2 className="text-lg sm:text-xl font-black text-indigo-900 tracking-tight flex items-center gap-2">
                <Radar className="text-indigo-600 animate-pulse" size={20} /> Active Broadcasts
             </h2>
             <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-widest mt-1">
@@ -94,23 +94,23 @@ export default function Operations() {
             </p>
           </div>
           
-          <button onClick={fetchOperationsData} className="p-2 hover:bg-indigo-100 rounded-full transition-colors">
+          <button onClick={fetchOperationsData} aria-label="Refresh operations" className="p-2 hover:bg-indigo-100 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
              <RefreshCw className={`text-indigo-500 ${loading ? 'animate-spin' : ''}`} size={18} />
           </button>
         </div>
 
         {/* Scrollable List */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-slate-50/50">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar bg-slate-50/50">
           
           {broadcastingOrders.length === 0 && !loading && (
-            <div className="flex flex-col items-center justify-center h-64 text-indigo-300 opacity-60">
-               <Package size={64} className="mb-4" />
+            <div className="flex flex-col items-center justify-center h-48 sm:h-64 text-indigo-300 opacity-60">
+               <Package size={56} className="mb-4" />
                <p className="font-black uppercase tracking-widest text-sm">No Active Broadcasts</p>
             </div>
           )}
 
           {broadcastingOrders.map(order => (
-            <div key={order.id} className="p-5 rounded-2xl border-2 border-indigo-200 bg-white shadow-sm flex flex-col gap-4">
+            <div key={order.id} className="p-4 sm:p-5 rounded-2xl border-2 border-indigo-200 bg-white shadow-sm flex flex-col gap-4">
               <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
                       <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg text-[10px] font-black uppercase flex items-center gap-1">
@@ -124,9 +124,9 @@ export default function Operations() {
               </div>
               
               <div>
-                  <h3 className="font-black text-slate-800 text-lg uppercase italic">{order.restaurant?.restaurant_name}</h3>
-                  <div className="flex items-center gap-1 text-sm text-slate-500 mt-1 font-bold">
-                    <MapPin size={14} className="text-indigo-400" /> {order.delivery_address || "Pickup"}
+                  <h3 className="font-black text-slate-800 text-base sm:text-lg uppercase italic">{order.restaurant?.restaurant_name}</h3>
+                  <div className="flex items-center gap-1 text-xs sm:text-sm text-slate-500 mt-1 font-bold">
+                    <MapPin size={14} className="text-indigo-400 shrink-0" /> {order.delivery_address || "Pickup"}
                   </div>
               </div>
             </div>
@@ -137,12 +137,12 @@ export default function Operations() {
       {/* ===================================================
           RIGHT COL: THE LIVE FLEET (Claimed / SLA Monitor)
       =================================================== */}
-      <div className="w-1/2 flex flex-col bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+      <div className="w-full lg:w-1/2 flex flex-col bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden min-h-[350px]">
         
         {/* Header */}
-        <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+        <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
           <div>
-             <h2 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+             <h2 className="text-lg sm:text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
                <Bike className="text-emerald-500" size={20} /> Live Fleet Transit
              </h2>
              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
@@ -152,7 +152,7 @@ export default function Operations() {
         </div>
 
         {/* Scrollable List */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-slate-50/30">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar bg-slate-50/30">
             
             {claimedOrders.length === 0 && (
                 <div className="h-64 flex flex-col items-center justify-center text-slate-300 opacity-60">

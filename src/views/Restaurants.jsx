@@ -4,7 +4,7 @@ import {
   Store, Power, Edit2, Check, X, Loader2, ShieldAlert, Trash2, PowerOff
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 export default function Restaurants() {
   const [restaurants, setRestaurants] = useState([]);
@@ -132,7 +132,7 @@ export default function Restaurants() {
       {/* 🔝 HEADER & STATS */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-2 border-slate-900 pb-6">
         <div>
-           <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">
+           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">
               Partner Network
            </h1>
            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">
@@ -141,15 +141,15 @@ export default function Restaurants() {
         </div>
 
         {/* CONTROLS */}
-        <div className="flex gap-3">
-           <div className="relative">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+           <div className="relative w-full sm:w-64">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-             <input type="text" placeholder="Search partners..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-indigo-500 w-64" />
+             <input type="text" placeholder="Search partners..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-indigo-500 min-h-[44px]" />
            </div>
            
-           <div className="flex bg-slate-100 p-1 rounded-xl">
+           <div className="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto justify-between sm:justify-start">
               {['ALL', 'OPEN', 'CLOSED'].map(f => (
-                <button key={f} onClick={() => setFilter(f)} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${filter === f ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                <button key={f} onClick={() => setFilter(f)} className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all min-h-[40px] ${filter === f ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}>
                   {f}
                 </button>
               ))}
@@ -160,7 +160,7 @@ export default function Restaurants() {
       {/* 🏬 GRID VIEW */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
          {filtered.map(restaurant => (
-            <div key={restaurant.id} className={`bg-white border rounded-[24px] p-6 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden ${restaurant.account_status === 'SUSPENDED' ? 'border-rose-200 bg-rose-50/30' : 'border-slate-200'}`}>
+            <div key={restaurant.id} className={`bg-white border rounded-2xl sm:rounded-[24px] p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden ${restaurant.account_status === 'SUSPENDED' ? 'border-rose-200 bg-rose-50/30' : 'border-slate-200'}`}>
                
                {/* STATUS BADGES */}
                <div className="absolute top-4 right-4 flex gap-2">

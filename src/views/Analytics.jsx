@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 // 🔗 CONFIG
-const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 // --- COMPONENTS ---
 const StatCard = ({ label, value, sub, icon: Icon, color = "slate", trend }) => (
@@ -179,34 +179,35 @@ export default function Analytics() {
     <div className="space-y-8 animate-in fade-in duration-700 font-sans pb-24 max-w-7xl mx-auto">
       
       {/* 🚀 HEADER & TIME CONTROLS */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-2 border-slate-900 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 border-b-2 border-slate-900 pb-6">
         <div>
-           <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">
+           <h1 className="text-2xl sm:text-4xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">
              Global Command
            </h1>
-           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-3">
+           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2 sm:mt-3">
              System-Wide Financials & Operations
            </p>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
             <button 
                 onClick={() => fetchAnalytics(true)}
                 disabled={isSyncing}
-                className="w-10 h-10 rounded-2xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm"
+                aria-label="Refresh analytics data"
+                className="w-10 h-10 rounded-2xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm shrink-0 min-h-[44px] min-w-[44px]"
             >
                 <RefreshCw size={16} className={isSyncing ? "animate-spin" : ""} />
             </button>
 
-            <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+            <div className="flex bg-slate-100 p-1 sm:p-1.5 rounded-2xl border border-slate-200 overflow-x-auto max-w-full">
                 {['Daily', 'Weekly', 'Monthly'].map((t) => (
                 <button 
                     key={t} 
                     onClick={() => setPeriod(t)} 
-                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all duration-300 flex items-center gap-2 ${
+                    className={`px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[10px] font-black uppercase transition-all duration-300 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-h-[40px] ${
                     period === t 
                         ? 'bg-white text-indigo-700 shadow-sm scale-100' 
-                        : 'text-slate-400 hover:text-slate-600 scale-95 hover:scale-100'
+                        : 'text-slate-400 hover:text-slate-600'
                     }`}
                 >
                     {t === 'Daily' && <Clock size={12} />}
@@ -254,18 +255,18 @@ export default function Analytics() {
       <div className="grid grid-cols-12 gap-8">
         
         {/* 📈 MAIN CHART AREA */}
-        <div className="col-span-12 lg:col-span-8 bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl relative overflow-hidden flex flex-col">
-          <div className="flex justify-between items-center mb-10">
+        <div className="col-span-12 lg:col-span-8 bg-white p-4 sm:p-8 rounded-3xl sm:rounded-[40px] border border-slate-100 shadow-xl relative overflow-hidden flex flex-col">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 sm:mb-10">
             <div>
-              <h3 className="text-slate-900 font-black text-2xl uppercase tracking-tighter italic">Revenue Trend</h3>
+              <h3 className="text-slate-900 font-black text-xl sm:text-2xl uppercase tracking-tighter italic">Revenue Trend</h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Platform Profit • {period} View</p>
             </div>
-            <div className="px-5 py-2.5 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl text-xs font-black uppercase tracking-wider shadow-sm flex items-center gap-2">
+            <div className="px-4 sm:px-5 py-2 sm:py-2.5 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl text-xs font-black uppercase tracking-wider shadow-sm flex items-center gap-2">
                <TrendingUp size={14} /> + {chartData.reduce((a,b) => a + b.revenue, 0).toLocaleString()} XAF
             </div>
           </div>
           
-          <div className="flex-1 w-full min-h-[350px]">
+          <div className="flex-1 w-full min-h-[280px] sm:min-h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
@@ -305,8 +306,8 @@ export default function Analytics() {
         </div>
 
         {/* 📜 RECENT LEDGER */}
-        <div className="col-span-12 lg:col-span-4 bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl flex flex-col">
-          <div className="flex justify-between items-center mb-8">
+        <div className="col-span-12 lg:col-span-4 bg-white p-4 sm:p-8 rounded-3xl sm:rounded-[40px] border border-slate-100 shadow-xl flex flex-col">
+          <div className="flex justify-between items-center mb-6 sm:mb-8">
              <div>
                 <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter italic">Recent Activity</h3>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Live Order Ledger</p>
