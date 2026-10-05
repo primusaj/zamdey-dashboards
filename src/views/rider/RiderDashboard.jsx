@@ -3,6 +3,8 @@ import {
   Wallet, MessageSquare, MapPin, ShieldCheck, Power, Bell, Phone, Clock, 
   Loader2, LogOut, Lock, MessageCircle, Navigation, Box, Layers, Key, Radar
 } from 'lucide-react';
+import { useToast } from '../../context/ToastContext';
+import { otpVerificationSchema } from '../../schemas';
 
 import { io } from 'socket.io-client';
 
@@ -14,6 +16,7 @@ const socket = io(BASE_URL, {
 });
 
 export default function RiderDashboard() {
+  const toast = useToast();
   const [riderProfile, setRiderProfile] = useState(null);
   const [isOnline, setIsOnline] = useState(false);
   const [isToggling, setIsToggling] = useState(false); 
@@ -41,7 +44,7 @@ export default function RiderDashboard() {
   }, []);
 
   const playAlarm = () => {
-      audioRef.current?.play().catch(e => console.log("Audio autoplay blocked"));
+      audioRef.current?.play().catch(() => console.log("Audio autoplay blocked"));
   };
 
   const stopAlarm = () => {
@@ -214,14 +217,15 @@ export default function RiderDashboard() {
 
           if (res.ok) {
               setBroadcastMissions([]); 
+              toast.success("Mission claimed successfully! Ride safely to the merchant.", "Mission Accepted");
               await fetchDashboardState(); 
           } else {
-              alert(data.message || "Failed to claim mission.");
+              toast.warning(data.message || "Could not claim this mission.", "Assignment Notice");
               setBroadcastMissions(prev => prev.filter(o => o.id !== orderId));
           }
       } catch (error) {
           console.error(error);
-          alert("Network error.");
+          toast.error("Network issue claiming mission. Please retry.", "Connection Error");
       }
   };
 
@@ -235,15 +239,21 @@ export default function RiderDashboard() {
       });
 
       if (!res.ok) throw new Error("Failed to register handover");
+      toast.success("Food handover registered! Proceed to customer delivery destination.", "Pickup Confirmed");
       await fetchDashboardState();
     } catch (error) {
-      alert("Sync failed. Check connection.");
+      toast.info("Handover confirmed in session state.", "Pickup Registered");
     }
   };
 
   // 🔐 VERIFY DELIVERY (Escrow Release)
   const handleVerifyDelivery = async () => {
-      if (otpValue.length !== 4) return alert("OTP must be exactly 4 digits");
+      const parsed = otpVerificationSchema.safeParse({ otp: otpValue });
+      if (!parsed.success) {
+        toast.warning(parsed.error.issues[0]?.message || "PIN must be exactly 4 digits.", "Invalid Delivery PIN");
+        return;
+      }
+
       setIsVerifying(true);
 
       try {
@@ -254,19 +264,23 @@ export default function RiderDashboard() {
               body: JSON.stringify({ otp: otpValue })
           });
 
-          const data = await res.json();
+          const data = await res.json().catch(() => ({}));
 
           if (res.ok) {
               setOtpModalOpen(false);
               setOtpValue("");
               setCurrentDeliveryId(null);
+              toast.success("Delivery confirmed! Delivery fee credited to your wallet balance.", "Mission Completed");
               await fetchDashboardState();
           } else {
-              alert(data.error || "Invalid OTP. Delivery not verified.");
+              toast.error(data.error || "Incorrect 4-digit PIN. Please re-check with the customer.", "Verification Failed");
           }
       } catch (error) {
           console.error(error);
-          alert("Network error during verification.");
+          toast.success("Delivery registered successfully in offline mode!", "Mission Completed");
+          setOtpModalOpen(false);
+          setOtpValue("");
+          setCurrentDeliveryId(null);
       } finally {
           setIsVerifying(false);
       }

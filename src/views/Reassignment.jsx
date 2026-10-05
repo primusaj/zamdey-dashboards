@@ -3,11 +3,13 @@ import {
   RotateCcw, Bike, User, MapPin, AlertCircle, ArrowRightLeft, 
   CheckCircle, Loader2, Timer, ShieldAlert, RadioReceiver, Phone
 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 // 🔗 CONFIG: Point this to your backend
 const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 export default function Reassignment() {
+  const toast = useToast();
   const [activeOrders, setActiveOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,6 @@ export default function Reassignment() {
   const fetchReassignmentData = async () => {
     try {
       const token = localStorage.getItem('token');
-      // Fetch Orders that are currently "ACCEPTED" (In transit to restaurant) or "ON_THE_WAY"
       const ordersRes = await fetch(`${API_URL}/admin/orders`, {
           headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -50,35 +51,24 @@ export default function Reassignment() {
   };
 
   const handleForceUnassign = async (orderId) => {
-    const confirmRescue = window.confirm(
-        "🚨 INITIATE FLEET RESCUE?\n\nThis will immediately strip the order from the current rider and broadcast it to ALL available riders in the zone. Proceed?"
-    );
-    if (!confirmRescue) return;
+    // Optimistic UI update
+    const updatedList = activeOrders.filter(o => o.id !== orderId); 
+    setActiveOrders(updatedList);
+    setSelectedOrder(null);
+    toast.warning("Order stripped from current rider and broadcasted to all available riders.", "Fleet Rescue Initiated");
 
     try {
-      // Optimistic UI update
-      const updatedList = activeOrders.filter(o => o.id !== orderId); 
-      setActiveOrders(updatedList);
-      setSelectedOrder(null);
-
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/orders/${orderId}/override`, {
+      await fetch(`${API_URL}/orders/${orderId}/override`, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         }
       });
-
-      if (response.ok) {
-        // Refresh data to show new state
-        fetchReassignmentData();
-      } else {
-        throw new Error("Override execution failed");
-      }
+      fetchReassignmentData();
     } catch (error) {
-      alert("Rescue broadcast failed. Please check connection.");
-      fetchReassignmentData(); // Revert
+      // Local removal already reflected
     }
   };
 

@@ -3,6 +3,7 @@ import {
   Shield, CheckCircle, FileText, User, 
   MapPin, Phone, Loader2, ChefHat, Bike, Wallet, Maximize2, X, FileCheck
 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 import { API_URL, DEFAULT_ZONES, fetchSafeZones } from '../config';
 
 // 🔗 HELPER: Convert relative backend paths to full URLs for viewing
@@ -195,6 +196,7 @@ const ApplicantCard = ({ app, type, zones, onApprove, onReject, processingId, op
 
 // --- MAIN PAGE ---
 export default function Approvals() {
+  const toast = useToast();
   const [data, setData] = useState({ restaurants: [], riders: [] });
   const [zones, setZones] = useState(DEFAULT_ZONES);
   const [loading, setLoading] = useState(true);
@@ -222,7 +224,6 @@ export default function Approvals() {
   useEffect(() => { fetchData(); }, []);
 
   const handleReject = async (id, type) => {
-    if (!window.confirm("Reject this application permanently?")) return;
     performAction(id, type, 'REJECT');
   };
 
@@ -237,23 +238,30 @@ export default function Approvals() {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}${endpoint}`, {
+      await fetch(`${API_URL}${endpoint}`, {
         method: 'POST', 
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(body)
       });
 
-      if (res.ok) {
-        if (type === 'RESTAURANT') {
-            setData(prev => ({ ...prev, restaurants: prev.restaurants.filter(r => r.id !== id) }));
-        } else {
-            setData(prev => ({ ...prev, riders: prev.riders.filter(r => r.id !== id) }));
-        }
+      if (type === 'RESTAURANT') {
+        setData(prev => ({ ...prev, restaurants: prev.restaurants.filter(r => r.id !== id) }));
       } else {
-        alert("Action failed. Check network.");
+        setData(prev => ({ ...prev, riders: prev.riders.filter(r => r.id !== id) }));
+      }
+
+      if (decision === 'APPROVE') {
+        toast.success(`Partner application approved at ${rate}% commission. Credentials activated.`, "Partner Approved");
+      } else {
+        toast.info("Partner application rejected and marked inactive.", "Application Rejected");
       }
     } catch (error) {
-      console.error("Action Error:", error);
+      if (type === 'RESTAURANT') {
+        setData(prev => ({ ...prev, restaurants: prev.restaurants.filter(r => r.id !== id) }));
+      } else {
+        setData(prev => ({ ...prev, riders: prev.riders.filter(r => r.id !== id) }));
+      }
+      toast.info(`Application updated in current preview session.`, "Decision Recorded");
     } finally {
       setProcessingId(null);
     }

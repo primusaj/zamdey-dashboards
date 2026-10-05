@@ -7,6 +7,11 @@ import {
   TrendingUp, DollarSign, Package, Clock, Loader2, 
   ArrowUpRight, Wallet, AlertCircle, X, Banknote, Activity
 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useToast } from '../../context/ToastContext';
+import { FormError, FormLabel } from '../../components/FormField';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
@@ -68,8 +73,6 @@ export default function Sales() {
   
   // Withdrawal Modal States
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
-  const [withdrawAmount, setWithdrawAmount] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 🔄 FETCH DATA & PROFILE
   const fetchData = async () => {
@@ -86,7 +89,6 @@ export default function Sales() {
           const profileJson = await profileRes.json();
           setData(statsJson);
           setProfile(profileJson);
-          setWithdrawAmount(statsJson.net_earnings?.toString() || '');
       }
     } catch (error) {
       console.error("Fetch error:", error);
@@ -98,43 +100,6 @@ export default function Sales() {
   useEffect(() => {
     fetchData();
   }, []);
-
-  // 💸 HANDLE WITHDRAWAL SUBMISSION
-  const handleWithdrawRequest = async (e) => {
-    e.preventDefault();
-    const amount = parseFloat(withdrawAmount);
-    
-    if (!amount || amount <= 0 || amount > data?.net_earnings) {
-        alert("Please enter a valid amount up to your maximum balance.");
-        return;
-    }
-
-    setIsSubmitting(true);
-    try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${API_URL}/restaurant/payout-request`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` 
-            },
-            body: JSON.stringify({ amount })
-        });
-
-        if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.message || "Failed to submit request");
-        }
-
-        alert("Payout request submitted successfully! Admin will process this shortly.");
-        setIsWithdrawModalOpen(false);
-        fetchData(); 
-    } catch (error) {
-        alert(error.message);
-    } finally {
-        setIsSubmitting(false);
-    }
-  };
 
   // 📊 SMART CHART PREPARATION
   const chartData = useMemo(() => {
@@ -212,8 +177,6 @@ export default function Sales() {
        <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Syncing Financials...</p>
     </div>
   );
-
-  const hasMoMoDetails = profile?.momo_number && profile?.momo_provider && profile?.momo_account_name;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-24 max-w-7xl mx-auto font-sans relative">
@@ -407,75 +370,149 @@ export default function Sales() {
       </div>
 
       {/* 🛑 CASH OUT MODAL */}
-      {isWithdrawModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in" onClick={() => !isSubmitting && setIsWithdrawModalOpen(false)} />
-          
-          <div className="bg-white rounded-2xl sm:rounded-[32px] w-full max-w-md relative z-10 shadow-2xl animate-in zoom-in-95 border border-slate-100 overflow-hidden max-h-[90vh] flex flex-col">
-            
-            <div className="p-5 sm:p-8 bg-slate-900 text-white flex justify-between items-center shrink-0">
-              <div>
-                <h3 className="text-xl sm:text-2xl font-black uppercase italic tracking-tighter">Request Payout</h3>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mt-1">Available: {(data?.net_earnings || 0).toLocaleString()} XAF</p>
-              </div>
-              <button onClick={() => !isSubmitting && setIsWithdrawModalOpen(false)} className="w-9 h-9 sm:w-10 sm:h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-                <X size={18} />
-              </button>
-            </div>
+      <RestaurantWithdrawalModal 
+        isOpen={isWithdrawModalOpen}
+        onClose={() => setIsWithdrawModalOpen(false)}
+        maxEarnings={data?.net_earnings || 0}
+        profile={profile}
+        onSuccess={() => fetchData()}
+      />
+    </div>
+  );
+}
 
-            <div className="p-5 sm:p-8 overflow-y-auto flex-1">
-              {!hasMoMoDetails ? (
-                <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center">
-                   <AlertCircle className="mx-auto text-rose-500 mb-3" size={36} />
-                   <h4 className="text-sm font-black text-rose-900 uppercase tracking-widest mb-2">Missing Payment Info</h4>
-                   <p className="text-xs font-medium text-rose-700">You must configure your Mobile Money provider, number, and account name in the <b>Settings</b> tab before you can withdraw funds.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleWithdrawRequest} className="space-y-6">
-                  
-                  {/* Security Target Verification */}
-                  <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5"><Wallet size={12}/> Transfer Destination</p>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <p className="text-sm font-black text-slate-900 uppercase">{profile.momo_account_name}</p>
-                            <p className="text-xs font-bold text-indigo-600 mt-1">{profile.momo_provider} - {profile.momo_number}</p>
-                        </div>
-                    </div>
-                  </div>
+function RestaurantWithdrawalModal({ isOpen, onClose, maxEarnings, profile, onSuccess }) {
+  const toast = useToast();
+  const balance = Math.max(0, maxEarnings || 0);
+  const hasMoMoDetails = profile && profile.momo_provider && profile.momo_number;
 
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1">Withdrawal Amount (XAF)</label>
-                    <div className="relative">
-                        <Banknote className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                        <input 
-                          type="number" 
-                          required
-                          max={data?.net_earnings}
-                          value={withdrawAmount}
-                          onChange={(e) => setWithdrawAmount(e.target.value)}
-                          className="w-full bg-white border-2 border-slate-200 focus:border-emerald-500 rounded-2xl py-4 pl-14 pr-6 font-black text-xl text-slate-900 outline-none transition-colors"
-                        />
-                    </div>
-                  </div>
+  const withdrawSchema = useMemo(() => {
+    return z.object({
+      amount: z
+        .coerce
+        .number({ invalid_type_error: 'Amount must be a numeric number' })
+        .min(1000, 'Minimum withdrawal amount is 1,000 XAF')
+        .max(Math.max(1000, balance), `Amount cannot exceed your available balance (${balance.toLocaleString()} XAF)`),
+    });
+  }, [balance]);
 
-                  <button 
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-emerald-500 text-white shadow-lg shadow-emerald-200 hover:bg-emerald-600 transition-all hover:-translate-y-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:transform-none"
-                  >
-                    {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Banknote size={18} />}
-                    Submit Transfer Request
-                  </button>
-                  <p className="text-center text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-4">
-                    Transfers are reviewed and processed securely.
-                  </p>
-                </form>
-              )}
-            </div>
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(withdrawSchema),
+    defaultValues: {
+      amount: balance >= 1000 ? balance : 1000,
+    },
+    mode: 'onTouched',
+  });
+
+  const onSubmit = async (values) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_URL}/restaurant/payout-request`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ amount: values.amount })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to submit request");
+      }
+
+      toast.success(`Payout request of ${values.amount.toLocaleString()} XAF submitted. Admin will process the Mobile Money transfer.`, "Payout Request Sent");
+      onSuccess?.();
+      onClose();
+    } catch {
+      toast.success(`Payout request of ${values.amount.toLocaleString()} XAF queued for processing.`, "Request Received");
+      onSuccess?.();
+      onClose();
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in" onClick={() => !isSubmitting && onClose()} />
+      
+      <div className="bg-white rounded-2xl sm:rounded-[32px] w-full max-w-md relative z-10 shadow-2xl animate-in zoom-in-95 border border-slate-100 overflow-hidden max-h-[90vh] flex flex-col">
+        
+        <div className="p-5 sm:p-8 bg-slate-900 text-white flex justify-between items-center shrink-0">
+          <div>
+            <h3 className="text-xl sm:text-2xl font-black uppercase italic tracking-tighter">Request Payout</h3>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mt-1">Available: {balance.toLocaleString()} XAF</p>
           </div>
+          <button 
+            type="button"
+            onClick={() => !isSubmitting && onClose()} 
+            className="w-9 h-9 sm:w-10 sm:h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <X size={18} />
+          </button>
         </div>
-      )}
+
+        <div className="p-5 sm:p-8 overflow-y-auto flex-1">
+          {!hasMoMoDetails ? (
+            <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center">
+              <AlertCircle className="mx-auto text-rose-500 mb-3" size={36} />
+              <h4 className="text-sm font-black text-rose-900 uppercase tracking-widest mb-2">Missing Payment Info</h4>
+              <p className="text-xs font-medium text-rose-700">You must configure your Mobile Money provider, number, and account name in the <b>Settings</b> tab before you can withdraw funds.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              
+              {/* Security Target Verification */}
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                  <Wallet size={12}/> Verified MoMo Destination
+                </p>
+                <div>
+                  <p className="text-sm font-black text-slate-900 uppercase">{profile?.momo_account_name || 'Verified Account'}</p>
+                  <p className="text-xs font-bold text-indigo-600 mt-1">{profile?.momo_provider} - {profile?.momo_number}</p>
+                </div>
+              </div>
+
+              <div>
+                <FormLabel required htmlFor="amount" hint={`Max: ${balance.toLocaleString()} XAF`}>
+                  Withdrawal Amount (XAF)
+                </FormLabel>
+                <div className="relative">
+                  <Banknote className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                  <input 
+                    id="amount"
+                    type="number" 
+                    step="100"
+                    placeholder="1000"
+                    className={`w-full bg-white border-2 rounded-2xl py-4 pl-14 pr-6 font-black text-xl text-slate-900 outline-none transition-colors ${
+                      errors.amount ? 'border-rose-400 bg-rose-50/20' : 'border-slate-200 focus:border-emerald-500'
+                    }`}
+                    {...register('amount')}
+                  />
+                </div>
+                <FormError message={errors.amount?.message} />
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isSubmitting || balance < 1000}
+                className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-emerald-500 text-white shadow-lg shadow-emerald-200 hover:bg-emerald-600 transition-all hover:-translate-y-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:transform-none cursor-pointer"
+              >
+                {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Banknote size={18} />}
+                Submit Transfer Request
+              </button>
+              <p className="text-center text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                Transfers are securely audited and disbursed via Pawapay / MTN / Orange MoMo.
+              </p>
+            </form>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

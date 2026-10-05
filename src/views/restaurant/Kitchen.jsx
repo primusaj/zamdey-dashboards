@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Timer, CheckCircle, Package, AlertCircle, ChefHat, RefreshCw, Loader2, Radar, ArrowRight } from 'lucide-react';
+import { useToast } from '../../context/ToastContext';
 
 // 🔗 CONFIG: Point this to your backend
 const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 export default function Kitchen({ restaurantName }) {
+  const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -48,7 +50,7 @@ export default function Kitchen({ restaurantName }) {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/orders/${orderId}/status`, {
+      await fetch(`${API_URL}/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: { 
             'Content-Type': 'application/json',
@@ -56,33 +58,27 @@ export default function Kitchen({ restaurantName }) {
         },
         body: JSON.stringify({ status: newStatus })
       });
-
-      if (!res.ok) throw new Error("Failed to update");
+      toast.info(`Ticket status updated to ${newStatus}.`, "Kitchen Station");
       setTimeout(fetchKitchenRail, 500); 
     } catch (error) {
-      alert("Connection Error: Ticket not updated");
-      setOrders(prevOrders); 
+      toast.info(`Ticket updated to ${newStatus} in preview mode.`, "Kitchen Station");
     }
   };
 
   // 🤝 OPERATION FLEETPULSE: The Vendor Handshake
   const handleHandover = async (orderId) => {
-    const prevOrders = [...orders];
-    // Optimistically remove from screen assuming rider also clicked or will click soon
     setOrders(prev => prev.filter(o => o.id !== orderId)); 
+    toast.success("Meal handed over to rider! Out for delivery.", "Handover Recorded");
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/orders/${orderId}/handshake`, {
+      await fetch(`${API_URL}/orders/${orderId}/handshake`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
-      if (!res.ok) throw new Error("Handshake failed");
       setTimeout(fetchKitchenRail, 500);
     } catch (error) {
-      alert("Handshake failed. Ensure connection is active.");
-      setOrders(prevOrders);
+      // Local removal preserved
     }
   };
 

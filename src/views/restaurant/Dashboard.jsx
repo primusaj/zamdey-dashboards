@@ -11,7 +11,6 @@ import {
   Radar,
   Package
 } from 'lucide-react';
-
 import { io } from 'socket.io-client';
 
 const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://zamdey-backend.onrender.com';
@@ -190,7 +189,7 @@ export default function RestaurantDashboard({ restaurantName }) {
           socket.emit('join_profile_room', { role: 'RESTAURANT', profileId: fetchedProfile.id });
           socket.emit('join_vendor_room', fetchedProfile.id); // Legacy fallback
 
-          socket.on('kitchen_wake_up', (data) => {
+          socket.on('kitchen_wake_up', () => {
               const audio = new Audio('/notification.mp3');
               audio.play().catch(e => console.warn("Audio blocked by browser policy:", e)); 
               fetchDashboard(); 

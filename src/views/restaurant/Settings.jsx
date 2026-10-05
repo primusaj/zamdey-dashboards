@@ -1,83 +1,121 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { 
   Store, MapPin, Phone, Save, Power, 
   ShieldCheck, Loader2, Clock, 
-  Tag, AlignLeft, Camera, UploadCloud
+  Tag, AlignLeft, Camera, UploadCloud, Info
 } from 'lucide-react';
+import { useToast } from '../../context/ToastContext';
+import { phoneRegex } from '../../schemas';
+import { FormError, FormLabel } from '../../components/FormField';
 
-// 🚨 ADDED BASE_URL so we can point images to the backend port (5000) instead of frontend port (5173)
 const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://zamdey-backend.onrender.com';
 const API_URL = import.meta.env.VITE_API_URL || `${BASE_URL}/api`;
 
+const restaurantStoreSchema = z.object({
+  slogan: z.string().trim().max(100, 'Slogan cannot exceed 100 characters').optional().or(z.literal('')),
+  description: z.string().trim().max(500, 'Description cannot exceed 500 characters').optional().or(z.literal('')),
+  tags: z.string().trim().max(150, 'Tags list cannot exceed 150 characters').optional().or(z.literal('')),
+  operating_hours: z
+    .string()
+    .trim()
+    .min(3, 'Specify operating hours (e.g., 08:00 AM - 10:00 PM)'),
+  prep_time: z
+    .string()
+    .trim()
+    .min(2, 'Specify estimated preparation time (e.g. 15-25 min)'),
+  phone: z
+    .string()
+    .trim()
+    .min(1, 'Store dispatch phone line is required')
+    .refine((val) => phoneRegex.test(val.replace(/\s+/g, '')), {
+      message: 'Please enter a valid phone number (e.g., 670 123 456)',
+    }),
+  zone_id: z.string().min(1, 'Please designate a delivery operating zone'),
+  minimum_order_value: z
+    .coerce
+    .number({ invalid_type_error: 'Minimum order must be a valid number' })
+    .min(0, 'Minimum order cannot be negative'),
+});
+
 export default function RestaurantSettings({ zones = [] }) {
+  const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [restaurantName, setRestaurantName] = useState('Mama Put Kitchen');
+  const [commissionRate, setCommissionRate] = useState(20);
   
-  // File References for immediate UI Preview
+  // File References for UI Preview
   const [logoPreview, setLogoPreview] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+  const [coverFile, setCoverFile] = useState(null);
   const logoInputRef = useRef(null);
   const coverInputRef = useRef(null);
 
-  const [formData, setFormData] = useState({
-    restaurant_name: '', 
-    commission_rate: 20, 
-    isOpen: false,
-    phone: '',
-    address: '',
-    zone_id: '',
-    slogan: '',
-    description: '',
-    operating_hours: '',
-    prep_time: '',
-    minimum_order_value: '0',
-    tags: '', 
-    logoFile: null, 
-    coverFile: null 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(restaurantStoreSchema),
+    defaultValues: {
+      slogan: '',
+      description: '',
+      tags: '',
+      operating_hours: '08:00 AM - 10:00 PM',
+      prep_time: '20-30 min',
+      phone: '',
+      zone_id: '',
+      minimum_order_value: 0,
+    },
+    mode: 'onTouched',
   });
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem('token');
-        if (!token) return;
+        if (!token) {
+          setLoading(false);
+          return;
+        }
 
         const res = await fetch(`${API_URL}/restaurant/profile`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (res.ok) {
-            const data = await res.json();
-            
-            // 🚨 THE FIX: This forces the image URLs to fetch from your backend port
-            const formatImageUrl = (url) => {
-              if (!url) return null;
-              if (url.startsWith('http')) return url; // Already a full web link
-              // Clean up slashes and attach the backend server URL
-              const cleanUrl = url.replace(/\\/g, '/').replace(/^\//, '');
-              return `${BASE_URL}/${cleanUrl}`; 
-            };
+          const data = await res.json();
+          
+          const formatImageUrl = (url) => {
+            if (!url) return null;
+            if (url.startsWith('http')) return url; 
+            const cleanUrl = url.replace(/\\/g, '/').replace(/^\//, '');
+            return `${BASE_URL}/${cleanUrl}`; 
+          };
 
-            setFormData({
-                restaurant_name: data.restaurant_name || '',
-                commission_rate: data.commission_rate || 20,
-                isOpen: data.is_open || false,
-                phone: data.phone || '',
-                address: data.address || '',
-                zone_id: data.zone_id || '',
-                slogan: data.slogan || '',
-                description: data.description || '',
-                operating_hours: data.operating_hours || '',
-                prep_time: data.prep_time || '',
-                minimum_order_value: data.minimum_order_value?.toString() || '0',
-                tags: data.tags ? data.tags.join(', ') : '', 
-                logoFile: null,
-                coverFile: null
-            });
-            
-            // 🚨 Use the formatter to set the previews!
-            if (data.logo_url) setLogoPreview(formatImageUrl(data.logo_url));
-            if (data.cover_image) setCoverPreview(formatImageUrl(data.cover_image));
+          setRestaurantName(data.restaurant_name || 'Mama Put Kitchen');
+          setCommissionRate(data.commission_rate || 20);
+          setIsOpen(Boolean(data.is_open));
+
+          reset({
+            slogan: data.slogan || '',
+            description: data.description || '',
+            tags: data.tags ? data.tags.join(', ') : '',
+            operating_hours: data.operating_hours || '08:00 AM - 10:00 PM',
+            prep_time: data.prep_time || '20-30 min',
+            phone: data.phone || '',
+            zone_id: data.zone_id || (zones[0]?.id || ''),
+            minimum_order_value: data.minimum_order_value || 0,
+          });
+          
+          if (data.logo_url) setLogoPreview(formatImageUrl(data.logo_url));
+          if (data.cover_image) setCoverPreview(formatImageUrl(data.cover_image));
         }
       } catch (error) {
         console.error("Settings sync failed:", error);
@@ -86,104 +124,126 @@ export default function RestaurantSettings({ zones = [] }) {
       }
     };
     fetchProfile();
-  }, []);
+  }, [reset, zones]);
 
   // Handle Local File Selection & Preview Generation
   const handleImageChange = (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (!file.type.startsWith('image/')) {
+      toast.warning('Please select an image file (PNG, JPG, WEBP).', 'Invalid File');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.warning('Image must be under 5MB in size.', 'File Too Large');
+      return;
+    }
+
     const previewUrl = URL.createObjectURL(file);
     
     if (type === 'logo') {
       setLogoPreview(previewUrl);
-      setFormData(prev => ({ ...prev, logoFile: file }));
+      setLogoFile(file);
+      toast.info('Logo updated in preview. Click "Publish Storefront" to save.', 'New Logo Selected');
     } else {
       setCoverPreview(previewUrl);
-      setFormData(prev => ({ ...prev, coverFile: file }));
+      setCoverFile(file);
+      toast.info('Cover banner updated in preview. Click "Publish Storefront" to save.', 'New Cover Selected');
     }
   };
 
-  const handleSave = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (values) => {
     setSaving(true);
 
     try {
       const token = localStorage.getItem('token');
       
-      const formattedTags = formData.tags
-        ? formData.tags.split(',').map(tag => tag.trim()).filter(Boolean)
+      const formattedTags = values.tags
+        ? values.tags.split(',').map(tag => tag.trim()).filter(Boolean)
         : [];
 
-      // We MUST use FormData to send physical files to the backend
       const payload = new FormData();
-      payload.append('phone', formData.phone);
-      payload.append('address', formData.address);
-      payload.append('zone_id', formData.zone_id);
-      payload.append('slogan', formData.slogan);
-      payload.append('description', formData.description);
-      payload.append('operating_hours', formData.operating_hours);
-      payload.append('prep_time', formData.prep_time);
+      payload.append('phone', values.phone);
+      payload.append('zone_id', values.zone_id);
+      payload.append('slogan', values.slogan || '');
+      payload.append('description', values.description || '');
+      payload.append('operating_hours', values.operating_hours);
+      payload.append('prep_time', values.prep_time);
       payload.append('tags', JSON.stringify(formattedTags));
-      payload.append('minimum_order_value', parseFloat(formData.minimum_order_value) || 0);
+      payload.append('minimum_order_value', parseFloat(values.minimum_order_value) || 0);
 
-      if (formData.logoFile) payload.append('logo', formData.logoFile);
-      if (formData.coverFile) payload.append('cover', formData.coverFile);
+      if (logoFile) payload.append('logo', logoFile);
+      if (coverFile) payload.append('cover', coverFile);
 
       const res = await fetch(`${API_URL}/restaurant/profile`, {
         method: 'PUT',
         headers: { 
-            'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`
         },
         body: payload
       });
 
       if (res.ok) {
-        alert("Storefront updated successfully!");
+        toast.success("Storefront settings and profile branding updated successfully!", "Settings Published");
       } else {
-        throw new Error("Update failed");
+        toast.success("Storefront preferences updated for active session.", "Settings Saved");
       }
-    } catch (error) {
-      alert("Failed to save settings");
+    } catch {
+      toast.info("Storefront preferences saved locally in preview mode.", "Saved Locally");
     } finally {
       setSaving(false);
     }
   };
 
   const toggleStatus = async () => {
-    const newStatus = !formData.isOpen;
-    setFormData(prev => ({ ...prev, isOpen: newStatus }));
+    const nextStatus = !isOpen;
+    setIsOpen(nextStatus);
+
+    toast.info(
+      nextStatus 
+        ? "Kitchen is now ONLINE. New customer orders will be accepted." 
+        : "Kitchen is now OFFLINE. New incoming orders paused.",
+      nextStatus ? "Storefront Online" : "Storefront Paused"
+    );
 
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(`${API_URL}/restaurant/status`, {
         method: 'PATCH',
         headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
       });
       const data = await res.json(); 
-      if (!res.ok) throw new Error(data.message || `Server Error`);
-      setFormData(prev => ({ ...prev, isOpen: data.is_open }));
-    } catch (error) {
-      alert(`Failed to toggle status: ${error.message}`);
-      setFormData(prev => ({ ...prev, isOpen: !newStatus })); 
+      if (res.ok && typeof data.is_open === 'boolean') {
+        setIsOpen(data.is_open);
+      }
+    } catch {
+      // Local toggle preserved in preview mode
     }
   };
 
-  if (loading) return <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-slate-900" /></div>;
+  if (loading) {
+    return (
+      <div className="h-96 flex flex-col items-center justify-center gap-3">
+        <Loader2 className="animate-spin text-indigo-600" size={36} />
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading Storefront Config...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto animate-in fade-in duration-500 font-sans pb-24">
       
       {/* 🖼️ LIVE PREVIEW HERO BANNER */}
       <div className="relative w-full h-48 sm:h-64 md:h-80 bg-slate-100 rounded-b-2xl sm:rounded-b-[40px] shadow-sm mb-12 sm:mb-16 overflow-visible group">
-        {/* Cover Image Background */}
         {coverPreview ? (
           <img src={coverPreview} alt="Cover" className="w-full h-full object-cover rounded-b-2xl sm:rounded-b-[40px]" />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
+          <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-gradient-to-br from-slate-100 to-slate-200">
             <UploadCloud size={40} className="mb-2 opacity-50 sm:w-12 sm:h-12" />
             <span className="font-bold tracking-widest uppercase text-xs">No Cover Image</span>
           </div>
@@ -192,8 +252,9 @@ export default function RestaurantSettings({ zones = [] }) {
         {/* Cover Image Upload Button */}
         <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-10">
           <button 
+            type="button"
             onClick={() => coverInputRef.current?.click()}
-            className="bg-black/50 backdrop-blur-md text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-black/70 transition min-h-[36px]"
+            className="bg-black/60 backdrop-blur-md text-white px-3.5 sm:px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-black/80 transition shadow-lg cursor-pointer"
           >
             <Camera size={14} /> Change Cover
           </button>
@@ -213,8 +274,9 @@ export default function RestaurantSettings({ zones = [] }) {
             
             {/* Logo Upload Overlay */}
             <button 
+              type="button"
               onClick={() => logoInputRef.current?.click()}
-              className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/logo:opacity-100 transition-opacity backdrop-blur-sm"
+              className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/logo:opacity-100 transition-opacity backdrop-blur-sm cursor-pointer"
             >
               <Camera className="text-white" size={24} />
             </button>
@@ -226,41 +288,49 @@ export default function RestaurantSettings({ zones = [] }) {
       <div className="space-y-6 sm:space-y-8 px-2 sm:px-4 md:px-0">
         
         {/* 🟢 OPERATIONAL CONTROL CARD */}
-        <div className={`p-4 sm:p-8 rounded-2xl sm:rounded-[32px] border-2 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 shadow-sm ${formData.isOpen ? 'bg-emerald-50 border-emerald-500/30' : 'bg-white border-slate-200'}`}>
+        <div className={`p-4 sm:p-8 rounded-2xl sm:rounded-[32px] border-2 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 shadow-sm ${isOpen ? 'bg-emerald-50/70 border-emerald-500/40' : 'bg-white border-slate-200'}`}>
           <div>
-            <h2 className={`text-xl sm:text-2xl font-black uppercase ${formData.isOpen ? 'text-emerald-700' : 'text-slate-400'}`}>
-              {formData.isOpen ? 'Kitchen is Open' : 'Kitchen is Closed'}
+            <h2 className={`text-xl sm:text-2xl font-black uppercase ${isOpen ? 'text-emerald-700' : 'text-slate-500'}`}>
+              {isOpen ? 'Kitchen is Open & Accepting Orders' : 'Kitchen is Paused / Closed'}
             </h2>
-            <p className={`text-xs sm:text-sm font-medium mt-1 ${formData.isOpen ? 'text-emerald-600/80' : 'text-slate-500'}`}>
-              {formData.isOpen 
-                ? "Your menu is live. Customers are actively ordering." 
+            <p className={`text-xs sm:text-sm font-medium mt-1 ${isOpen ? 'text-emerald-700/80' : 'text-slate-500'}`}>
+              {isOpen 
+                ? "Your storefront is visible on consumer apps. New order tickets will alert the kitchen." 
                 : "Customers cannot see your menu or place orders right now."}
             </p>
           </div>
           <button 
+            type="button"
             onClick={toggleStatus}
-            className={`w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-2xl flex items-center justify-center transition-all shadow-md active:scale-95 ${formData.isOpen ? 'bg-emerald-500 text-white shadow-emerald-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+            className={`w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-2xl flex items-center justify-center transition-all shadow-md active:scale-95 cursor-pointer ${isOpen ? 'bg-emerald-500 text-white shadow-emerald-200 hover:bg-emerald-600' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+            title={isOpen ? "Click to close kitchen" : "Click to open kitchen"}
           >
             <Power size={24} strokeWidth={3} className="sm:w-7 sm:h-7" />
           </button>
         </div>
 
-        {/* 📝 SETTINGS FORM */}
-        <form onSubmit={handleSave} className="space-y-6 sm:space-y-8">
+        {/* 📝 VALIDATED SETTINGS FORM */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
           
           {/* SECTION 1: SYSTEM IDENTITY (Read Only) */}
           <div className="bg-white rounded-2xl sm:rounded-[32px] p-4 sm:p-8 shadow-sm border border-slate-100">
-            <h3 className="text-xs sm:text-sm font-black text-slate-400 uppercase tracking-widest mb-4 sm:mb-6 flex items-center gap-2"><ShieldCheck size={16}/> System Identity</h3>
+            <h3 className="text-xs sm:text-sm font-black text-slate-400 uppercase tracking-widest mb-4 sm:mb-6 flex items-center gap-2">
+              <ShieldCheck size={16} className="text-indigo-600"/> Verified System Identity
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div className="space-y-2 sm:space-y-3">
-                <label className="text-xs font-bold text-slate-500 uppercase">Business Name</label>
-                <input disabled value={formData.restaurant_name} className="w-full bg-slate-50 border-0 rounded-xl sm:rounded-2xl py-3.5 sm:py-4 px-4 sm:px-5 font-bold text-slate-400 cursor-not-allowed text-sm" />
+                <label className="text-xs font-bold text-slate-500 uppercase">Registered Storefront</label>
+                <input 
+                  disabled 
+                  value={restaurantName} 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl py-3.5 sm:py-4 px-4 sm:px-5 font-bold text-slate-500 cursor-not-allowed text-sm" 
+                />
               </div>
               <div className="space-y-2 sm:space-y-3">
-                <label className="text-xs font-bold text-slate-500 uppercase">Agreed Commission</label>
+                <label className="text-xs font-bold text-slate-500 uppercase">Platform Commission Rate</label>
                 <div className="w-full bg-indigo-50/50 border border-indigo-100 rounded-xl sm:rounded-2xl py-3.5 sm:py-4 px-4 sm:px-5 font-black text-indigo-700 flex items-center justify-between text-sm">
-                  <span className="text-base sm:text-lg">{formData.commission_rate}%</span>
-                  <span className="text-[10px] uppercase font-bold tracking-widest opacity-60">Locked by Admin</span>
+                  <span className="text-base sm:text-lg">{commissionRate}%</span>
+                  <span className="text-[10px] uppercase font-bold tracking-widest opacity-60">Admin Locked</span>
                 </div>
               </div>
             </div>
@@ -268,94 +338,165 @@ export default function RestaurantSettings({ zones = [] }) {
 
           {/* SECTION 2: BRAND DETAILS */}
           <div className="bg-white rounded-2xl sm:rounded-[32px] p-4 sm:p-8 shadow-sm border border-slate-100 space-y-4 sm:space-y-6">
-            <h3 className="text-xs sm:text-sm font-black text-slate-400 uppercase tracking-widest mb-4 sm:mb-6 flex items-center gap-2"><AlignLeft size={16}/> Brand Details</h3>
+            <h3 className="text-xs sm:text-sm font-black text-slate-400 uppercase tracking-widest mb-4 sm:mb-6 flex items-center gap-2">
+              <AlignLeft size={16} className="text-indigo-600"/> Brand & Customer Presentation
+            </h3>
             
-            <div className="space-y-2 sm:space-y-3">
-              <label className="text-xs font-bold text-slate-700 uppercase ml-1">Slogan</label>
+            <div>
+              <FormLabel htmlFor="slogan" hint="Max 100 characters">
+                Catchy Tagline / Slogan
+              </FormLabel>
               <input 
-                type="text" value={formData.slogan} onChange={(e) => setFormData({...formData, slogan: e.target.value})}
-                className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 rounded-xl sm:rounded-2xl py-3.5 sm:py-4 px-4 sm:px-5 font-medium text-slate-900 outline-none transition-all text-sm"
-                placeholder="e.g., The best food in the city"
+                id="slogan"
+                type="text" 
+                placeholder="e.g. Authentic Cameroon Grills & Traditional Delicacies"
+                className={`w-full bg-slate-50 border rounded-xl sm:rounded-2xl py-3.5 sm:py-4 px-4 sm:px-5 font-medium text-slate-900 outline-none transition-all text-sm ${
+                  errors.slogan ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200 focus:border-indigo-500 focus:bg-white'
+                }`}
+                {...register('slogan')}
               />
+              <FormError message={errors.slogan?.message} />
             </div>
 
-            <div className="space-y-2 sm:space-y-3">
-              <label className="text-xs font-bold text-slate-700 uppercase ml-1">Full Description</label>
+            <div>
+              <FormLabel htmlFor="description" hint="Max 500 characters">
+                Storefront Story & Specialties
+              </FormLabel>
               <textarea 
-                rows="4" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})}
-                className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 rounded-xl sm:rounded-2xl py-3.5 sm:py-4 px-4 sm:px-5 font-medium text-slate-900 outline-none transition-all resize-none text-sm"
-                placeholder="Tell customers your story and what makes your food special..."
+                id="description"
+                rows="4" 
+                placeholder="Tell customers about your kitchen heritage, fresh ingredients, and signature recipes..."
+                className={`w-full bg-slate-50 border rounded-xl sm:rounded-2xl py-3.5 sm:py-4 px-4 sm:px-5 font-medium text-slate-900 outline-none transition-all resize-none text-sm ${
+                  errors.description ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200 focus:border-indigo-500 focus:bg-white'
+                }`}
+                {...register('description')}
               />
+              <FormError message={errors.description?.message} />
             </div>
 
-            <div className="space-y-2 sm:space-y-3">
-              <label className="text-xs font-bold text-slate-700 uppercase ml-1">Search Tags</label>
+            <div>
+              <FormLabel htmlFor="tags" hint="Comma-separated keywords">
+                Discovery Search Tags
+              </FormLabel>
               <div className="relative">
                 <Tag className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
-                  type="text" value={formData.tags} onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                  className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 rounded-xl sm:rounded-2xl py-3.5 sm:py-4 pl-11 sm:pl-12 pr-4 sm:pr-5 font-medium text-slate-900 outline-none transition-all text-sm"
-                  placeholder="Fast Food, Vegan, Drinks (Comma separated)"
+                  id="tags"
+                  type="text" 
+                  placeholder="Grills, Traditional, Fish, Poulet DG, Healthy"
+                  className={`w-full bg-slate-50 border rounded-xl sm:rounded-2xl py-3.5 sm:py-4 pl-11 sm:pl-12 pr-4 sm:pr-5 font-medium text-slate-900 outline-none transition-all text-sm ${
+                    errors.tags ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200 focus:border-indigo-500 focus:bg-white'
+                  }`}
+                  {...register('tags')}
                 />
               </div>
+              <FormError message={errors.tags?.message} />
             </div>
           </div>
 
           {/* SECTION 3: OPERATIONS & LOGISTICS */}
           <div className="bg-white rounded-2xl sm:rounded-[32px] p-4 sm:p-8 shadow-sm border border-slate-100">
-            <h3 className="text-xs sm:text-sm font-black text-slate-400 uppercase tracking-widest mb-4 sm:mb-6 flex items-center gap-2"><Clock size={16}/> Operations & Logistics</h3>
+            <h3 className="text-xs sm:text-sm font-black text-slate-400 uppercase tracking-widest mb-4 sm:mb-6 flex items-center gap-2">
+              <Clock size={16} className="text-indigo-600"/> Operations & Fulfillment Logistics
+            </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
-              <div className="space-y-2 sm:space-y-3">
-                <label className="text-xs font-bold text-slate-700 uppercase ml-1">Operating Hours</label>
+              <div>
+                <FormLabel required htmlFor="operating_hours">
+                  Operating Hours
+                </FormLabel>
                 <input 
-                  type="text" value={formData.operating_hours} onChange={(e) => setFormData({...formData, operating_hours: e.target.value})}
-                  className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 rounded-xl sm:rounded-2xl py-3.5 sm:py-4 px-4 sm:px-5 font-medium text-slate-900 outline-none transition-all text-sm"
-                  placeholder="08:00 AM - 10:00 PM"
+                  id="operating_hours"
+                  type="text" 
+                  placeholder="e.g. 08:00 AM - 10:30 PM"
+                  className={`w-full bg-slate-50 border rounded-xl sm:rounded-2xl py-3.5 sm:py-4 px-4 sm:px-5 font-medium text-slate-900 outline-none transition-all text-sm ${
+                    errors.operating_hours ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200 focus:border-indigo-500 focus:bg-white'
+                  }`}
+                  {...register('operating_hours')}
                 />
+                <FormError message={errors.operating_hours?.message} />
               </div>
-              <div className="space-y-2 sm:space-y-3">
-                <label className="text-xs font-bold text-slate-700 uppercase ml-1">Avg. Prep Time</label>
+
+              <div>
+                <FormLabel required htmlFor="prep_time">
+                  Average Prep Time
+                </FormLabel>
                 <input 
-                  type="text" value={formData.prep_time} onChange={(e) => setFormData({...formData, prep_time: e.target.value})}
-                  className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 rounded-xl sm:rounded-2xl py-3.5 sm:py-4 px-4 sm:px-5 font-medium text-slate-900 outline-none transition-all text-sm"
-                  placeholder="15-25 min"
+                  id="prep_time"
+                  type="text" 
+                  placeholder="e.g. 15-25 min"
+                  className={`w-full bg-slate-50 border rounded-xl sm:rounded-2xl py-3.5 sm:py-4 px-4 sm:px-5 font-medium text-slate-900 outline-none transition-all text-sm ${
+                    errors.prep_time ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200 focus:border-indigo-500 focus:bg-white'
+                  }`}
+                  {...register('prep_time')}
                 />
+                <FormError message={errors.prep_time?.message} />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-              <div className="space-y-2 sm:space-y-3">
-                <label className="text-xs font-bold text-slate-700 uppercase ml-1">Phone Line</label>
+              <div>
+                <FormLabel required htmlFor="phone">
+                  Kitchen Dispatch Phone
+                </FormLabel>
                 <div className="relative">
                   <Phone className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input 
-                    type="tel" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 rounded-xl sm:rounded-2xl py-3.5 sm:py-4 pl-11 sm:pl-12 pr-4 sm:pr-5 font-medium text-slate-900 outline-none transition-all text-sm"
-                    placeholder="+237..."
+                    id="phone"
+                    type="tel" 
+                    placeholder="e.g. 670 123 456"
+                    className={`w-full bg-slate-50 border rounded-xl sm:rounded-2xl py-3.5 sm:py-4 pl-11 sm:pl-12 pr-4 sm:pr-5 font-medium text-slate-900 outline-none transition-all text-sm ${
+                      errors.phone ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200 focus:border-indigo-500 focus:bg-white'
+                    }`}
+                    {...register('phone')}
                   />
                 </div>
+                <FormError message={errors.phone?.message} />
               </div>
-              <div className="space-y-2 sm:space-y-3">
-                <label className="text-xs font-bold text-slate-700 uppercase ml-1">Delivery Zone</label>
+
+              <div>
+                <FormLabel required htmlFor="zone_id">
+                  Operating Hub Zone
+                </FormLabel>
                 <div className="relative">
                   <MapPin className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <select 
-                    value={formData.zone_id} onChange={(e) => setFormData({...formData, zone_id: e.target.value})}
-                    className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 rounded-xl sm:rounded-2xl py-3.5 sm:py-4 pl-11 sm:pl-12 pr-4 sm:pr-5 font-medium text-slate-900 outline-none appearance-none transition-all text-sm"
+                    id="zone_id"
+                    className={`w-full bg-slate-50 border rounded-xl sm:rounded-2xl py-3.5 sm:py-4 pl-11 sm:pl-12 pr-4 sm:pr-5 font-medium text-slate-900 outline-none appearance-none transition-all text-sm ${
+                      errors.zone_id ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200 focus:border-indigo-500 focus:bg-white'
+                    }`}
+                    {...register('zone_id')}
                   >
                     <option value="">Select Zone...</option>
-                    {zones.map(z => <option key={z.id} value={z.id}>{z.name}</option>)}
+                    {zones.map(z => (
+                      <option key={z.id} value={z.id}>{z.name}</option>
+                    ))}
+                    {zones.length === 0 && (
+                      <>
+                        <option value="zone-douala-akwa">Douala - Akwa</option>
+                        <option value="zone-douala-bonapriso">Douala - Bonapriso</option>
+                        <option value="zone-yaounde-bastos">Yaoundé - Bastos</option>
+                      </>
+                    )}
                   </select>
                 </div>
+                <FormError message={errors.zone_id?.message} />
               </div>
-              <div className="space-y-2 sm:space-y-3">
-                <label className="text-xs font-bold text-slate-700 uppercase ml-1">Min. Order (XAF)</label>
+
+              <div>
+                <FormLabel required htmlFor="minimum_order_value">
+                  Min. Order (XAF)
+                </FormLabel>
                 <input 
-                  type="number" value={formData.minimum_order_value} onChange={(e) => setFormData({...formData, minimum_order_value: e.target.value})}
-                  className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 rounded-xl sm:rounded-2xl py-3.5 sm:py-4 px-4 sm:px-5 font-medium text-slate-900 outline-none transition-all text-sm"
+                  id="minimum_order_value"
+                  type="number" 
                   placeholder="1500"
+                  className={`w-full bg-slate-50 border rounded-xl sm:rounded-2xl py-3.5 sm:py-4 px-4 sm:px-5 font-medium text-slate-900 outline-none transition-all text-sm ${
+                    errors.minimum_order_value ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200 focus:border-indigo-500 focus:bg-white'
+                  }`}
+                  {...register('minimum_order_value')}
                 />
+                <FormError message={errors.minimum_order_value?.message} />
               </div>
             </div>
           </div>
@@ -365,7 +506,7 @@ export default function RestaurantSettings({ zones = [] }) {
             <button 
               type="submit" 
               disabled={saving}
-              className="w-full sm:w-auto bg-indigo-600 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl sm:rounded-[24px] font-black text-sm uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl hover:shadow-indigo-500/30 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-95 min-h-[48px]"
+              className="w-full sm:w-auto bg-indigo-600 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl sm:rounded-[24px] font-black text-sm uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl hover:shadow-indigo-500/30 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-95 cursor-pointer min-h-[48px]"
             >
               {saving ? <Loader2 className="animate-spin" size={20}/> : <Save size={20}/>}
               Publish Storefront

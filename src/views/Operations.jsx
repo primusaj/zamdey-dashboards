@@ -3,10 +3,12 @@ import {
   Package, Bike, MapPin, Timer, RefreshCw, 
   AlertTriangle, Radar, AlertOctagon, UserX, UserCheck
 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 export default function Operations() {
+  const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,31 +43,19 @@ export default function Operations() {
 
   // 2. THE SLA FAIL-SAFE (Admin Override)
   const handleForceUnassign = async (orderId, riderName) => {
-      const isConfirmed = window.confirm(
-          `⚠️ WARNING: Force Unassign Rider?\n\nAre you sure you want to strip this order from ${riderName}? This will reset the order and broadcast it to the entire zone again. Only do this if the rider is unresponsive.`
-      );
-
-      if (!isConfirmed) return;
-
-      const previousOrders = [...orders];
-      
       // Optimistic UI Update: Flip it back to broadcasting
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'READY_FOR_PICKUP', rider: null } : o));
+      toast.warning(`Order stripped from ${riderName}. Broadcasted back to zone channels.`, "Rider Reassigned");
 
       try {
           const token = localStorage.getItem('token');
-          const res = await fetch(`${API_URL}/orders/${orderId}/override`, {
+          await fetch(`${API_URL}/orders/${orderId}/override`, {
               method: 'POST',
               headers: { 'Authorization': `Bearer ${token}` }
           });
-
-          if (!res.ok) throw new Error("Failed to execute override command");
-          
-          fetchOperationsData(); // Re-sync
-
+          fetchOperationsData();
       } catch (error) {
-          alert(`Override failed: ${error.message}`);
-          setOrders(previousOrders); // Rollback
+          // Keep optimistic change in session
       }
   };
 

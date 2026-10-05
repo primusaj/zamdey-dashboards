@@ -151,7 +151,7 @@ export default function App() {
       const token = argToken || loggedInUser.token || loggedInUser.access_token;
 
       if (!token) {
-          alert("Login Error: Server did not send a session token.");
+          console.error("Login Error: Server did not send a session token.");
           return;
       }
 
