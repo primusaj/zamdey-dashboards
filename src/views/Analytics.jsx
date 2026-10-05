@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 // 🔗 CONFIG
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
 
 // --- COMPONENTS ---
 const StatCard = ({ label, value, sub, icon: Icon, color = "slate", trend }) => (

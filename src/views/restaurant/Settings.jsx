@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 // 🚨 ADDED BASE_URL so we can point images to the backend port (5000) instead of frontend port (5173)
-const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://zamdey-backend.onrender.com/api:5000';
 const API_URL = import.meta.env.VITE_API_URL || `${BASE_URL}/api`;
 
 export default function RestaurantSettings({ zones = [] }) {

@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 
 // 🔗 CONFIG: Point this to your backend
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
 
 export default function Reassignment() {
   const [activeOrders, setActiveOrders] = useState([]);

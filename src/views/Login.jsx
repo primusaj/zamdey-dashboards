@@ -5,7 +5,7 @@ import {
   Wallet, Smartphone, Building, UploadCloud, CheckCircle2
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api';
 
 export default function Login({ onLogin }) {
   const [isRegister, setIsRegister] = useState(false);
@@ -69,7 +69,6 @@ export default function Login({ onLogin }) {
     }
   };
 
-  // 🚨 NEW: Vocal Validation for "Next Step"
   const handleNextStep = () => {
     setError('');
     if (registerStep === 1) {
@@ -95,7 +94,6 @@ export default function Login({ onLogin }) {
     e.preventDefault();
     setError('');
 
-    // 🚨 NEW: Vocal Validation for "Submit"
     if (isRegister) {
       if (!formData.momoProvider || !formData.momoNumber || !formData.momoAccountName) {
         setError("⚠️ Please complete all MoMo payout details.");
@@ -187,7 +185,6 @@ export default function Login({ onLogin }) {
     }
   };
 
-  // 🚨 REMOVED native HTML required attributes so React can handle the errors gracefully
   const FileInput = ({ name, label }) => {
     const file = formData[name];
     return (
@@ -241,12 +238,9 @@ export default function Login({ onLogin }) {
             )}
           </div>
 
-          {/* Form wrapper handles the final submission */}
           <form onSubmit={handleSubmit} className="space-y-4">
             
-            {/* ================================================= */}
-            {/* STEP 1: IDENTITY & ROLE                           */}
-            {/* ================================================= */}
+            {/* STEP 1: IDENTITY & ROLE */}
             {(!isRegister || registerStep === 1) && (
               <div className="space-y-5 animate-in fade-in zoom-in-95">
                 {isRegister && (
@@ -318,9 +312,7 @@ export default function Login({ onLogin }) {
               </div>
             )}
 
-            {/* ================================================= */}
-            {/* STEP 2: OPERATIONS                                */}
-            {/* ================================================= */}
+            {/* STEP 2: OPERATIONS */}
             {isRegister && registerStep === 2 && (
                <div className="space-y-5 animate-in fade-in zoom-in-95">
                   <div>
@@ -382,13 +374,10 @@ export default function Login({ onLogin }) {
                </div>
             )}
 
-            {/* ================================================= */}
-            {/* STEP 3: FINANCIALS & DOCS                         */}
-            {/* ================================================= */}
+            {/* STEP 3: FINANCIALS & DOCS */}
             {isRegister && registerStep === 3 && (
                <div className="space-y-5 animate-in fade-in zoom-in-95">
                  
-                 {/* MOMO DETAILS */}
                  <div className="p-5 bg-emerald-50/50 rounded-2xl border border-emerald-100 space-y-4">
                     <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest flex items-center gap-2 border-b border-emerald-100 pb-2">
                        <Wallet size={12} /> Payout MoMo Account
@@ -407,7 +396,6 @@ export default function Login({ onLogin }) {
                     </div>
                  </div>
 
-                 {/* DIRECT DOCUMENT UPLOADS */}
                  <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3">
                     <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2 border-b border-slate-200 pb-2">
                        <FileText size={12} /> Direct Uploads (PDF, JPG, PNG)

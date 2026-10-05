@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Wallet, TrendingUp, History, Calendar, CheckCircle2, Loader2, ShieldCheck } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
 
 export default function RiderEarnings() {
   const [rider, setRider] = useState(null);

@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { io } from 'socket.io-client';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
 const BASE_URL = API_URL.replace('/api', '');
 
 // 🎧 GLOBAL LOUD AUDIO ENGINE (No MP3 files needed!)

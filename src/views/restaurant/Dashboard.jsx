@@ -14,7 +14,7 @@ import {
 
 import { io } from 'socket.io-client';
 
-const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://zamdey-backend.onrender.com/api:5000';
 const API_URL = import.meta.env.VITE_API_URL || `${BASE_URL}/api`;
 
 const socket = io(BASE_URL, {

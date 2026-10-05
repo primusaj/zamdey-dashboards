@@ -6,7 +6,7 @@ import {
   Smartphone, Search, Check, XCircle, Zap
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
 const COLORS = ['#10B981', '#3B82F6', '#6366F1']; 
 
 export default function Finances() {

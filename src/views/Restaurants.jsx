@@ -4,7 +4,7 @@ import {
   Store, Power, Edit2, Check, X, Loader2, ShieldAlert, Trash2, PowerOff
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
 
 export default function Restaurants() {
   const [restaurants, setRestaurants] = useState([]);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutGrid, Image as ImageIcon, Plus, Trash2, Loader2, Store, Megaphone, X, AlertCircle } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
 // Helper to fix local image paths
 const formatImageUrl = (url) => {
     if (!url) return 'https://placehold.co/600x400';

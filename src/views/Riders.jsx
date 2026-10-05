@@ -5,7 +5,7 @@ import {
   MapPin, Shield, ChevronRight, Filter, AlertOctagon
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
 
 const StatWidget = ({ label, value, sub, color }) => (
   <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col min-w-[160px]">

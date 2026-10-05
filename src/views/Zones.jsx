@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Plus, X, Globe, TrendingUp, ShieldCheck, Trash2, Loader2, DollarSign } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://zamdey-backend.onrender.com/api:5000/api';
 
 export default function Zones({ locations = [], setLocations }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
